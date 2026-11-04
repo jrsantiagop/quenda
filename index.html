@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#5f2a1d">
+  <title>QUENDA — Directorio Residencial</title>
+  <link rel="icon" href="img/quenda-isotipo.png" type="image/png">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/componentes.css">
+</head>
+<body>
+
+  <!-- ============================ LOGIN ============================ -->
+  <div id="pantalla-login" class="pantalla-login">
+    <div class="tarjeta-login">
+      <img src="img/quenda-logo.png" class="logo-login" alt="Quenda">
+      <p class="subtitulo-login">Directorio telefónico residencial</p>
+
+      <div id="login-demo" class="banner-demo oculto"></div>
+
+      <form id="form-login">
+        <div class="campo">
+          <label for="l-correo">Correo</label>
+          <input id="l-correo" type="email" required autocomplete="username" placeholder="tu@correo.com">
+        </div>
+        <div class="campo">
+          <label for="l-clave">Clave</label>
+          <input id="l-clave" type="password" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <button class="boton boton-primario boton-bloque" id="login-enviar" type="submit">Ingresar</button>
+        <button type="button" id="btn-olvide-clave" class="enlace-olvide">¿Olvidaste tu clave de acceso?</button>
+        <p id="login-mensaje" class="texto-error"></p>
+      </form>
+
+      <p id="login-pie" class="texto-suave centro"></p>
+      <p class="credito centro">Directorio residencial · Diseñada por <strong>Quenda</strong></p>
+    </div>
+  </div>
+
+  <!-- ============================ APP ============================ -->
+  <div id="banner-demo" class="banner-demo oculto">
+    ⚠️ <strong>Modo demostración</strong> — los datos son de ejemplo y se guardan solo en este navegador.
+    Conecta tu Firebase en <code>js/firebase-config.js</code> para usar datos reales.
+  </div>
+
+  <div id="app-shell" class="shell oculto">
+    <aside class="menu">
+      <div class="marca">
+        <img src="img/quenda-isotipo.png" class="logo-iso" alt="">
+        <span>QUENDA</span>
+      </div>
+      <div id="menu-comunidad" class="comunidad-chip"></div>
+      <nav id="menu-links" class="menu-links"></nav>
+      <div class="pie-menu">
+        <div id="usuario-info" class="usuario-info"></div>
+        <button id="btn-mi-clave" class="boton boton-bloque">🔑 Reestablecer mi clave de acceso</button>
+        <button id="btn-salir" class="boton boton-bloque">Cerrar sesión</button>
+      </div>
+      <div class="credito-menu">Diseñada por <strong>Quenda</strong></div>
+    </aside>
+
+    <main id="contenido" class="principal"></main>
+  </div>
+
+  <div id="contenedor-toast"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+// ============================================================================
+// QUENDA — Reglas de seguridad de Firestore
+// Esta es la MISMA versión que está publicada en Firebase Console.
+// Para actualizarla: Console → Firestore → pestaña "Seguridad".
+// ============================================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Perfil del usuario autenticado (colección usuarios/{uid})
+    function perfil() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function autenticado() {
+      return request.auth != null && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function esSuper() {
+      return autenticado() && perfil().rol == 'superadmin';
+    }
+
+    function esAdminDe(comunidad) {
+      return autenticado() && perfil().rol == 'admin' && perfil().comunidadId == comunidad;
+    }
+
+    function esResidenteDe(comunidad) {
+      return autenticado() && perfil().rol == 'residente' && perfil().comunidadId == comunidad;
+    }
+
+    // Cuentas: se leen para saber roles; solo superadmin borra.
+    match /usuarios/{uid} {
+      allow read: if autenticado();
+      // Superadmin crea cualquier cuenta. Un admin crea cuentas de SU
+      // comunidad (residentes u otros admins de la misma).
+      allow create: if esSuper()
+        || (autenticado() && perfil().rol == 'admin'
+            && request.resource.data.comunidadId == perfil().comunidadId
+            && request.resource.data.rol in ['residente', 'admin']);
+      // Editar cuentas: el superadmin edita cualquier cuenta MENOS la suya
+      // (así nadie puede cambiarse el rol a sí mismo y bloquear el acceso).
+      // Cada persona puede editar su propia ficha y un admin las de su
+      // comunidad; en ambos casos SOLO el nombre y el estado activo:
+      // rol, comunidad y correo no pueden cambiar por esta vía.
+      function sinCambiarIdentidad() {
+        return request.resource.data.rol == resource.data.rol
+          && request.resource.data.comunidadId == resource.data.comunidadId
+          && request.resource.data.correo == resource.data.correo;
+      }
+      allow update: if (esSuper() && request.auth.uid != uid)
+        || (request.auth.uid == uid && sinCambiarIdentidad())
+        || (autenticado() && perfil().rol == 'admin'
+            && resource.data.comunidadId == perfil().comunidadId
+            && sinCambiarIdentidad());
+      allow delete: if esSuper();
+    }
+
+    // Datos por comunidad
+    match /comunidades/{comunidadId} {
+      allow read: if autenticado();
+      allow write: if esSuper();
+
+      // Subcolecciones: estructura, viviendas, avisos, emergencias, solicitudes...
+      match /{documento=**} {
+        allow read: if esSuper() || esAdminDe(comunidadId) || esResidenteDe(comunidadId);
+        allow write: if esSuper() || esAdminDe(comunidadId);
+      }
+    }
+  }
+}

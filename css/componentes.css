@@ -1,0 +1,451 @@
+/* ============================================================================
+   QUENDA — Componentes de interfaz
+   Botones, campos, tarjetas de vivienda, badges, tablas, modales y toasts.
+   ========================================================================== */
+
+/* ----------------------------- Botones ----------------------------- */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+  color: var(--texto);
+  border-radius: var(--radio-mini);
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.15s, background 0.15s;
+}
+.boton:hover { filter: brightness(0.97); }
+.boton:disabled { opacity: 0.6; cursor: wait; }
+
+.boton-primario { background: var(--primario); border-color: var(--primario); color: #fff; }
+.boton-primario:hover { filter: brightness(1.08); }
+
+.boton-peligro { background: var(--peligro); border-color: var(--peligro); color: #fff; }
+
+.boton-mini { padding: 5px 10px; font-size: 13px; border-radius: 6px; }
+
+.boton-bloque { width: 100%; }
+
+.boton-wa { background: #25d366; border-color: #25d366; color: #08340f; }
+.boton-correo { background: #ede9fe; border-color: #c4b5fd; color: #4c1d95; }
+
+/* ----------------------------- Campos ------------------------------ */
+
+.campo { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+.campo label { font-size: 12.5px; font-weight: 600; color: var(--texto-suave); }
+.campo input,
+.campo select,
+.campo textarea {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--texto);
+  width: 100%;
+}
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: 2px solid var(--primario);
+  outline-offset: 1px;
+  border-color: var(--primario);
+}
+.campo input:disabled { background: #f1f5f9; color: var(--texto-suave); }
+
+.label-check {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px !important;
+  color: var(--texto) !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+}
+.label-check input { width: auto; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+.form-grid .campo-ancho { grid-column: 1 / -1; }
+
+.grupo-campos {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  background: #fafbfc;
+}
+.titulo-grupo { grid-column: 1 / -1; margin: 0 0 2px; font-size: 13.5px; }
+
+/* Campo de teléfono: selector de país + número */
+.campo-tel { display: flex; gap: 6px; align-items: stretch; }
+.campo-tel .tel-pais { width: 132px; flex-shrink: 0; }
+.campo-tel input { flex: 1; min-width: 0; }
+.aviso-tel { display: block; color: #b45309; font-size: 11px; margin-top: 3px; line-height: 1.3; }
+.grupo-campos .campo { margin: 0; }
+
+@media (max-width: 620px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .grupo-campos { grid-template-columns: 1fr; }
+}
+
+.fila-integrante {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr auto;
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+.fila-integrante input {
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 13.5px;
+  width: 100%;
+}
+
+/* ------------------------- Cabecera página -------------------------- */
+
+.cabecera-pagina {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.cabecera-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cabecera-con-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.logo-comunidad-grande {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 5px;
+  flex-shrink: 0;
+  box-shadow: var(--sombra);
+}
+.titulo-pagina { margin: 0 0 4px; font-size: 22px; }
+.subtitulo { margin: 0; color: var(--texto-suave); font-size: 13.5px; }
+
+/* ------------------------- Barras y filtros ------------------------- */
+
+.barra-filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.campo-busq {
+  flex: 2;
+  min-width: 220px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.campo-select {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  padding: 10px;
+  font-size: 14px;
+  background: #fff;
+  min-width: 160px;
+}
+
+/* ------------------------------ Resumen ----------------------------- */
+
+.resumen {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+.stat strong { color: var(--texto); font-size: 15px; margin-right: 4px; }
+
+/* --------------------------- Tarjetas ------------------------------- */
+
+.lista-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.tarjeta-vivienda {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--verde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tarjeta-vivienda.tipo-renta { border-left-color: var(--amarillo); }
+.tarjeta-vivienda.tipo-vacante { border-left-color: #9ca3af; }
+
+.tv-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid var(--borde);
+  padding-bottom: 10px;
+}
+.tv-ubica { font-size: 12px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.4px; }
+.tv-dir { margin: 2px 0 0; font-size: 18px; }
+.tv-badges { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+
+.tv-contactos { display: flex; flex-direction: column; gap: 8px; }
+
+.aviso-vacante {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+  font-style: italic;
+}
+
+/* Persona (bloque de contacto) */
+.persona {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radio-mini);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.persona-suave { background: #f8fafc; border-color: var(--borde); }
+.persona-emergencia { background: #fef2f2; border-color: #fecaca; }
+.persona-cab { display: flex; flex-direction: column; gap: 1px; }
+.persona-titulo {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--texto-suave);
+  font-weight: 700;
+}
+.persona-cab strong { font-size: 14.5px; }
+.persona-datos { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--texto); }
+.num-tel { font-weight: 600; }
+.icono-wa { width: 15px; height: 15px; vertical-align: -3px; }
+.icono-label { width: 14px; height: 14px; vertical-align: -2px; }
+.icono-boton { width: 16px; height: 16px; vertical-align: -4px; }
+.persona-acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Botón de WhatsApp con la identidad de la marca */
+.boton-wa {
+  background: #25d366;
+  border-color: #1da851;
+  color: #fff;
+  font-weight: 600;
+}
+.boton-wa:hover { background: #1fb857; border-color: #178f45; }
+
+/* Chips (integrantes) */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: #eef2f7;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12.5px;
+}
+
+/* Nota interna */
+.nota-interna {
+  background: #fffbeb;
+  border: 1px dashed #fcd34d;
+  border-radius: var(--radio-mini);
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: #92400e;
+}
+
+/* ------------------------------ Badges ------------------------------ */
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-ok { background: #dcfce7; color: #166534; }
+.badge-renta { background: #fef3c7; color: #92400e; }
+.badge-gris { background: #e5e7eb; color: #4b5563; }
+.badge-aviso { background: #dbeafe; color: #1e40af; }
+.badge-oficio { background: #ede9fe; color: #5b21b6; }
+
+/* ------------------------- Listas tipo tabla ------------------------ */
+
+.lista-filas { display: flex; flex-direction: column; gap: 8px; }
+
+.fila {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  box-shadow: var(--sombra);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fila-principal { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fila-secundaria { color: var(--texto-suave); font-size: 13px; }
+.fila-acciones { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* --------------------------- Tarjeta comunidad ---------------------- */
+
+.tarjeta-comunidad {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tc-cab { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.tc-nombre { margin: 0; font-size: 17px; }
+.tc-tipo { font-size: 12.5px; color: var(--texto-suave); }
+.tc-stats { display: flex; gap: 14px; font-size: 13px; color: var(--texto-suave); flex-wrap: wrap; }
+.tc-stats strong { color: var(--texto); font-size: 15px; margin-right: 4px; }
+.tc-acciones { display: flex; gap: 8px; }
+
+/* ---------------------------- Vacío / avisos ------------------------ */
+
+.vacio {
+  grid-column: 1 / -1;
+  background: var(--blanco);
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio);
+  padding: 26px;
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.aviso-centro {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 40px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.aviso-centro h2 { margin: 0; font-size: 20px; }
+.aviso-centro p { margin: 0; color: var(--texto-suave); }
+
+/* ------------------------------ Modales ----------------------------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+.modal {
+  background: var(--blanco);
+  border-radius: 14px;
+  box-shadow: var(--sombra-modal);
+  width: 100%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--borde);
+}
+.modal-cab h3 { margin: 0; font-size: 16.5px; }
+.modal-cerrar {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--texto-suave);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.modal-cerrar:hover { background: #f1f5f9; }
+.modal-cuerpo { padding: 16px 18px; overflow-y: auto; }
+.modal-pie {
+  padding: 12px 18px;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.texto-confirmar { font-size: 14.5px; line-height: 1.5; }
+
+/* ------------------------------ Toasts ------------------------------ */
+
+#contenedor-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1200;
+  max-width: 340px;
+}
+.toast {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  box-shadow: var(--sombra-modal);
+  opacity: 1;
+  transition: opacity 0.4s, transform 0.4s;
+}
+.toast-error { background: var(--peligro); }
+.toast-info { background: #1e40af; }
+.toast-out { opacity: 0; transform: translateY(8px); }
