@@ -21,10 +21,10 @@ y aislamiento de permisos (el residente no ve notas internas ni administración)
 - [x] Estructura configurable por comunidad (calles con casas o torres con apartamentos)
 - [x] Viviendas con propietario, inquilino (en renta), integrantes, emergencia, notas internas
 - [x] **Hasta 3 teléfonos por persona (casa, trabajo, móvil)** con **selector de código de país** (~180 países, +52 México predeterminado) y aviso suave de dígitos esperados
-- [x] **Hasta 2 correos por persona** (propietario e inquilino: correo + segundo correo)
+- [x] **Un correo por persona** (y 3 teléfonos por persona: casa, trabajo, móvil con selector de código de país, +52 México predeterminado, con aviso suave de dígitos esperados)
 - [x] **Regla de guardado**: la persona principal (inquilino si hay renta con inquilino; si no, propietario) necesita **al menos un teléfono y un correo** para guardar
 - [x] **Directorio de solo lectura**: los números son texto fijo (sin enlaces ni botón "Llamar"); botón verde de **WhatsApp** (logo oficial) solo cuando hay móvil, y botón de Correo
-- [x] **Logo QUENDA** (PNG oficial con transparencia) en login, menú y favicon + crédito «Diseñada por Quenda»
+- [x] **Logo QUENDA** (PNG oficial con transparencia) en login, menú y favicon + crédito «Diseñada por PC Supportnet»
 - [x] **Logo propio del residencial** (URL de imagen) en el menú y cabecera del directorio
 - [x] **Segundo administrador**: un admin puede crear más admins de su propia comunidad
 - [x] **Editar cuentas (✏️)**: superadmin edita nombre, rol y comunidad de cualquiera; el admin edita las de su comunidad (solo nombre). Nadie cambia su propio rol
@@ -45,7 +45,7 @@ En **Viviendas** (administración): botones **⬇️ Excel**, **📥 Importar**,
 
 - **⬇️ Excel** — el directorio completo como archivo **.xlsx real**: cada dato
   en su columna y fila correspondientes (25 columnas: dirección, estado,
-  propietario con sus 3 teléfonos y 2 correos, inquilino, emergencia,
+  propietario con sus 3 teléfonos y su correo, inquilino, emergencia,
   integrantes, notas), con anchos de columna y filtro automático. Abre
   perfecto en cualquier Excel, sin importar la configuración regional del
   equipo. Incluye una segunda hoja «Guía» que explica cada columna.
@@ -221,8 +221,9 @@ quenda/
 ## 📇 Modelo de teléfonos y correos
 
 Cada persona (propietario, inquilino, contacto de emergencia) admite hasta 3
-números: `telefonos: { casa, trabajo, movil }` y, propietario e inquilino,
-hasta 2 correos: `correo` y `correo2`. El campo antiguo `telefono` sigue
+números: `telefonos: { casa, trabajo, movil }` y un correo `correo`
+(el viejo `correo2` ya no se usa; si algún registro antiguo lo trae, se ignora
+en pantalla y se limpia al guardar). El campo antiguo `telefono` sigue
 aceptándose y se migra automáticamente a "móvil" al leerse.
 
 **En el formulario** cada teléfono tiene un selector de código de país

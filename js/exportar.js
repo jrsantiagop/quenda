@@ -72,10 +72,11 @@ export function cargarXLSX() {
  */
 export const COLUMNAS_DIRECTORIO = [
   'Ubicación', 'Dirección', 'Estado',
-  'Propietario', 'Móvil propietario', 'Casa propietario', 'Trabajo propietario', 'Correo propietario', 'Correo 2 propietario',
-  'Inquilino', 'Móvil inquilino', 'Casa inquilino', 'Trabajo inquilino', 'Correo inquilino', 'Correo 2 inquilino',
+  'Propietario', 'Móvil propietario', 'Casa propietario', 'Trabajo propietario', 'Correo propietario',
+  'Inquilino', 'Móvil inquilino', 'Trabajo inquilino', 'Correo inquilino',
   'Emergencia', 'Móvil emergencia', 'Casa emergencia', 'Trabajo emergencia', 'Tipo de sangre', 'Relación',
-  'Integrantes', 'Colaborador vecinal', 'Oficio', 'Nota interna',
+  'Integrantes', 'Integrantes móviles', 'Integrantes correos',
+  'Colaborador vecinal', 'Oficio', 'Nota interna',
 ];
 
 /** Ambiente de una vivienda: texto legible para el Excel. */
@@ -101,10 +102,12 @@ export function filasDirectorio({ estructura = [], viviendas = [] }) {
       nombreDe(v.ubicaId),
       v.numero || '',
       estadoTexto(v),
-      p.nombre || '', tP.movil || '', tP.casa || '', tP.trabajo || '', p.correo || '', p.correo2 || '',
-      i.nombre || '', tI.movil || '', tI.casa || '', tI.trabajo || '', i.correo || '', i.correo2 || '',
+      p.nombre || '', tP.movil || '', tP.casa || '', tP.trabajo || '', p.correo || '',
+      i.nombre || '', tI.movil || '', tI.trabajo || '', i.correo || '',
       e.nombre || '', tE.movil || '', tE.casa || '', tE.trabajo || '', e.tipoSangre || '', e.relacion || '',
-      (v.integrantes || []).map((x) => (x.relacion ? `${x.nombre} (${x.relacion})` : x.nombre)).join('; '),
+      (v.integrantes || []).map((x) => (x.nombre || '')).join('; '),
+      (v.integrantes || []).map((x) => (x.movil || '')).join('; '),
+      (v.integrantes || []).map((x) => (x.correo || '')).join('; '),
       v.esColaboradorVecinal ? 'Sí' : 'No',
       v.oficio || '',
       v.notaInterna || '',
@@ -120,12 +123,14 @@ const GUIA_FILAS = [
   ['Ubicación', 'Nombre de la calle o torre. Debe coincidir con una ya creada en la sección Estructura.'],
   ['Dirección', 'Número de casa o de apartamento. Junto con la Ubicación identifica la vivienda.'],
   ['Estado', 'Propia, En renta, Vacante o Inactiva. Si va vacío se toma como Propia.'],
-  ['Propietario', 'Nombre del propietario (si la casa está En renta, el inquilino es la persona principal).'],
+  ['Propietario', 'Nombre del propietario.'],
   ['Móvil / Casa / Trabajo', 'Teléfonos con código de país, ejemplo: +52 55 1234 5678. Sin código se asume +52 (México).'],
-  ['Correo / Correo 2', 'La persona principal necesita al menos un correo para poder guardarse (Correos 2 opcionales).'],
+  ['Correo', 'La persona principal necesita al menos un correo para poder guardarse.'],
   ['Inquilino', 'Solo llenar cuando el Estado es «En renta». Nombre y datos de contacto del inquilino.'],
   ['Emergencia', 'Contacto de emergencia opcional: nombre, teléfonos, tipo de sangre y relación.'],
-  ['Integrantes', 'Separados por punto y coma. Relación entre paréntesis. Ej.: Ana Pérez (esposa); Luis (hijo).'],
+  ['Integrantes', 'Los del hogar: solo sus nombres, separados por punto y coma. Ej.: Ana Pérez; Luis Pérez.'],
+  ['Integrantes móviles', 'Los móviles en el MISMO orden de los nombres. Ej.: +52 55 1111 2222; +52 55 3333 4444.'],
+  ['Integrantes correos', 'Los correos en el MISMO orden de los nombres. Ej.: ana@correo.com; luis@correo.com.'],
   ['Colaborador vecinal', 'Escribir Sí o No.'],
   ['Oficio', 'Oficio del propietario o inquilino si colabora con la comunidad (opcional).'],
   ['Nota interna', 'Nota visible solo para administración; no aparece en el directorio de vecinos.'],
@@ -135,7 +140,7 @@ const GUIA_FILAS = [
 /* --------------------------- Exportación ---------------------------- */
 
 /** Anchos de columna (en caracteres) para que el Excel se lea cómodo. */
-const ANCHOS_DIRECTORIO = [18, 14, 10, 24, 18, 18, 18, 30, 30, 24, 18, 18, 18, 30, 30, 24, 18, 18, 18, 10, 16, 36, 12, 24, 44];
+const ANCHOS_DIRECTORIO = [18, 14, 10, 24, 18, 18, 18, 30, 24, 18, 18, 30, 24, 18, 18, 18, 10, 16, 30, 28, 30, 12, 24, 44];
 
 /** Arma el libro con hoja de datos + hoja Guía y dispara la descarga. */
 async function guardarConGuia(nombreArchivo, filas) {
@@ -167,12 +172,16 @@ export async function descargarExcel({ comunidad = '', estructura = [], vivienda
 /** Plantilla con encabezados, dos ejemplos y la hoja Guía. */
 export async function descargarPlantilla() {
   const ejemplo = [
-    ['Calle Principal', '1', 'Propia', 'Pedro Ejemplo', '+52 55 1234 5678', '', '', 'pedro@ejemplo.com', '',
-      '', '', '', '', '', '',
-      'Laura Ejemplo', '+52 55 8765 4321', '', '', 'O+', 'Esposa', '', 'Sí', 'Enfermera', ''],
-    ['Calle Principal', '2', 'En renta', 'Marta Dueños', '+52 55 3344 5566', '', '', 'marta@ejemplo.com', 'marta2@ejemplo.com',
-      'Ana Inquilina', '+52 55 9900 1122', '', '', 'ana@ejemplo.com', '',
-      'Jorge Ayuda', '+52 55 5566 7788', '', '', 'O+', 'Hijo de la inquilina', 'Sofía Inquilina (hija)', 'No', '', ''],
+    ['Calle Principal', '1', 'Propia', 'Pedro Ejemplo', '+52 55 1234 5678', '', '', 'pedro@ejemplo.com',
+      '', '', '', '',
+      'Laura Ejemplo', '+52 55 8765 4321', '', '', 'O+', 'Esposa',
+      'Sofía Ejemplo', '+52 55 3344 5566', 'sofia@ejemplo.com',
+      'Sí', 'Enfermera', ''],
+    ['Calle Principal', '2', 'En renta', 'Marta Dueños', '+52 55 6600 1122', '', '', 'marta@ejemplo.com',
+      'Ana Inquilina', '+52 55 9900 1122', '', 'ana@ejemplo.com',
+      'Jorge Ayuda', '+52 55 5566 7788', '', '', 'O+', 'Hijo de la inquilina',
+      '', '', '',
+      'No', '', ''],
   ];
   await guardarConGuia('plantilla-directorio-quenda.xlsx', [COLUMNAS_DIRECTORIO.slice(), ...ejemplo]);
 }
@@ -188,13 +197,11 @@ const MAPA_COLUMNAS = {
   'casa propietario': 'p.casa',
   'trabajo propietario': 'p.trabajo',
   'correo propietario': 'p.correo',
-  'correo 2 propietario': 'p.correo2',
   'inquilino': 'i.nombre',
   'movil inquilino': 'i.movil',
   'casa inquilino': 'i.casa',
   'trabajo inquilino': 'i.trabajo',
   'correo inquilino': 'i.correo',
-  'correo 2 inquilino': 'i.correo2',
   'emergencia': 'e.nombre',
   'movil emergencia': 'e.movil',
   'casa emergencia': 'e.casa',
@@ -202,6 +209,8 @@ const MAPA_COLUMNAS = {
   'tipo de sangre': 'e.sangre',
   'relacion': 'e.relacion',
   'integrantes': 'integrantes',
+  'integrantes moviles': 'integrantesMoviles',
+  'integrantes correos': 'integrantesCorreos',
   'colaborador vecinal': 'colaborador',
   'oficio': 'oficio',
   'nota interna': 'nota',
@@ -330,15 +339,12 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
       t.trabajo.avisos.forEach((a) => item.avisos.push(a));
       const telefonos = { movil: t.movil.valor, casa: t.casa.valor, trabajo: t.trabajo.valor };
       const correo = v[`${prefijo}.correo`] || '';
-      const correo2 = v[`${prefijo}.correo2`] || '';
-      [correo, correo2].forEach((c, i) => {
-        if (c && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) {
-          item.errores.push(`${etiquetas.nombre}: el correo${i ? ' 2' : ''} «${c}» no parece válido.`);
-        }
-      });
+      if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        item.errores.push(`${etiquetas.nombre}: el correo «${correo}» no parece válido.`);
+      }
       return {
         nombre: v[`${prefijo}.nombre`] || '',
-        correo, correo2, telefonos,
+        correo, telefonos,
         telefono: telefonos.movil || telefonos.casa || telefonos.trabajo || '',
       };
     }
@@ -352,10 +358,10 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
     // El inquilino solo entra cuando la vivienda está en renta (igual que el formulario).
     let inquilino = null;
     if (tipo === 'renta') {
-      const conDatos = inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo || inquilinoDatos.correo2;
+      const conDatos = inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo;
       if (conDatos) inquilino = inquilinoDatos;
       else item.avisos.push('El estado es En renta pero no hay datos de inquilino.');
-    } else if (inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo || inquilinoDatos.correo2) {
+    } else if (inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo) {
       item.avisos.push('Los datos de inquilino se ignoraron porque el estado no es En renta.');
     }
 
@@ -364,17 +370,26 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
     const principal = (tipo === 'renta' && inquilino && inquilino.nombre) ? inquilino : propietario;
     const etiquetaPrincipal = principal === inquilino ? 'el inquilino' : 'el propietario';
     if (!principal.telefono) item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un teléfono.`);
-    if (!principal.correo && !principal.correo2) item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un correo.`);
+    if (!principal.correo) item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un correo.`);
 
-    // Integrantes: "Nombre (relación); Nombre2 (relación2)".
-    const integrantes = String(v.integrantes || '')
+    // Integrantes: tres columnas paralelas (nombres, móviles, correos),
+    // cada una separada por punto y coma y alineada por posición.
+    const trozos = (texto) => String(texto || '')
       .split(/[;|]/)
       .map((t) => t.trim())
-      .filter(Boolean)
-      .map((t) => {
-        const m = t.match(/^(.*?)\s*\((.*)\)\s*$/);
-        return m ? { nombre: m[1], relacion: m[2] } : { nombre: t, relacion: '' };
-      });
+      .filter(Boolean);
+    const nombresInt = trozos(v.integrantes);
+    const movilesInt = trozos(v.integrantesMoviles);
+    const correosInt = trozos(v.integrantesCorreos);
+    const integrantes = nombresInt.map((nombre, i) => ({
+      nombre,
+      movil: movilesInt[i] || '',
+      correo: correosInt[i] || '',
+    }));
+    // Si solo se llenaron móviles o correos sin nombres, avisar.
+    if (!nombresInt.length && (movilesInt.length || correosInt.length)) {
+      item.avisos.push('Hay móviles o correos de integrantes sin nombres; se ignoraron.');
+    }
 
     const colaboradorTxt = igualTxt(v.colaborador);
     if (colaboradorTxt && colaboradorTxt !== 'si' && colaboradorTxt !== 'no') {

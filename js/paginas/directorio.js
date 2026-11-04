@@ -99,7 +99,7 @@ export async function render(cont, ctx) {
   function bloquePersona(titulo, p, principal) {
     if (!p) return '';
     const t = p.telefonos || { casa: '', trabajo: '', movil: '', };
-    if (!p.nombre && !t.movil && !t.casa && !t.trabajo && !p.correo && !p.correo2) return '';
+    if (!p.nombre && !t.movil && !t.casa && !t.trabajo && !p.correo) return '';
 
     // Números como texto fijo (sin enlaces). El móvil lleva el logo de WhatsApp.
     const filasTel = [
@@ -123,7 +123,6 @@ export async function render(cont, ctx) {
         <div class="persona-datos">
           ${filasTel}
           ${p.correo ? `<span>✉️ ${esc(p.correo)}</span>` : ''}
-          ${p.correo2 ? `<span>✉️ ${esc(p.correo2)}</span>` : ''}
         </div>
         ${acciones ? `<div class="persona-acciones">${acciones}</div>` : ''}
       </div>`;
@@ -147,7 +146,7 @@ export async function render(cont, ctx) {
       : '';
 
     const integrantes = v.integrantes.length
-      ? `<div class="chips">${v.integrantes.map((i) => `<span class="chip">${esc(i.nombre)}${i.relacion ? ` · ${esc(i.relacion)}` : ''}</span>`).join('')}</div>`
+      ? `<div class="chips">${v.integrantes.map((i) => `<span class="chip">${esc(i.nombre)}</span>`).join('')}</div>`
       : '';
 
     const eme = v.emergencia;

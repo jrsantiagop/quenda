@@ -33,7 +33,7 @@ export async function render(cont, ctx) {
         <p class="subtitulo">${viviendas.length} viviendas registradas.</p>
       </div>
       <div class="cabecera-acciones">
-        <button class="boton" id="btn-export-xlsx" title="Descarga el directorio como Excel (.xlsx): cada dato en su columna y fila">⬇️ Excel</button>
+        <button class="boton" id="btn-export-xlsx" title="Descarga el directorio como Excel (.xlsx): cada dato en su columna y fila">⬇️ Exportar</button>
         <button class="boton" id="btn-importar" title="Crea o actualiza viviendas desde un archivo .xlsx o .csv, con revisión previa">📥 Importar</button>
         <button class="boton" id="btn-plantilla" title="Descarga la plantilla .xlsx con las columnas exactas y ejemplos">📝 Plantilla</button>
         <button class="boton" id="btn-export-json" title="Descarga un respaldo completo de la comunidad (JSON)">🗄️ Respaldo</button>
@@ -363,10 +363,6 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       <h4 class="titulo-grupo">👤 Propietario</h4>
       <div class="campo"><label>Nombre</label><input id="fv-p-nombre" value="${esc(datos.propietario.nombre)}"></div>
       <div class="campo"><label>Correo electrónico</label><input id="fv-p-correo" type="email" value="${esc(datos.propietario.correo)}"></div>
-      <div class="campo" id="cont-p-correo2" ${datos.propietario.correo2 ? '' : 'hidden'}><label>Segundo correo (opcional)</label><input id="fv-p-correo2" type="email" value="${esc(datos.propietario.correo2 || '')}"></div>
-      <div class="campo campo-ancho">
-        <button type="button" class="boton boton-mini" id="btn-p-correo2" ${datos.propietario.correo2 ? 'hidden' : ''}>+ Agregar segundo correo</button>
-      </div>
       ${campoTelefono('p', 'movil', datos.propietario.telefonos.movil, 'Móvil (WhatsApp)')}
       ${campoTelefono('p', 'casa', datos.propietario.telefonos.casa, 'Casa')}
       ${campoTelefono('p', 'trabajo', datos.propietario.telefonos.trabajo, 'Trabajo')}
@@ -376,12 +372,7 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       <h4 class="titulo-grupo">🔑 Inquilino (arrendatario)</h4>
       <div class="campo"><label>Nombre</label><input id="fv-i-nombre" value="${esc(datos.inquilino ? datos.inquilino.nombre : '')}"></div>
       <div class="campo"><label>Correo electrónico</label><input id="fv-i-correo" type="email" value="${esc(datos.inquilino ? datos.inquilino.correo : '')}"></div>
-      <div class="campo" id="cont-i-correo2" ${datos.inquilino && datos.inquilino.correo2 ? '' : 'hidden'}><label>Segundo correo (opcional)</label><input id="fv-i-correo2" type="email" value="${esc(datos.inquilino ? datos.inquilino.correo2 || '' : '')}"></div>
-      <div class="campo campo-ancho">
-        <button type="button" class="boton boton-mini" id="btn-i-correo2" ${datos.inquilino && datos.inquilino.correo2 ? 'hidden' : ''}>+ Agregar segundo correo</button>
-      </div>
       ${campoTelefono('i', 'movil', datos.inquilino ? datos.inquilino.telefonos.movil : '', 'Móvil (WhatsApp)')}
-      ${campoTelefono('i', 'casa', datos.inquilino ? datos.inquilino.telefonos.casa : '', 'Casa')}
       ${campoTelefono('i', 'trabajo', datos.inquilino ? datos.inquilino.telefonos.trabajo : '', 'Trabajo')}
     </div>
 
@@ -428,17 +419,18 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
   });
 
   const contenedorIntegrantes = contenido.querySelector('#fv-integrantes');
-  function agregarFilaIntegrante(nombre = '', relacion = '') {
+  function agregarFilaIntegrante(nombre = '', movil = '', correo = '') {
     const fila = document.createElement('div');
     fila.className = 'fila-integrante';
     fila.innerHTML = `
       <input class="fi-nombre" placeholder="Nombre" value="${esc(nombre)}">
-      <input class="fi-relacion" placeholder="Relación (cónyuge, hija…)" value="${esc(relacion)}">
+      <input class="fi-movil" placeholder="Móvil (Ej: +52 55 1234 5678)" inputmode="tel" value="${esc(movil)}">
+      <input class="fi-correo" placeholder="Correo" type="email" value="${esc(correo)}">
       <button type="button" class="boton boton-mini boton-peligro" title="Quitar">✕</button>`;
     fila.querySelector('button').addEventListener('click', () => fila.remove());
     contenedorIntegrantes.appendChild(fila);
   }
-  (datos.integrantes || []).forEach((i) => agregarFilaIntegrante(i.nombre, i.relacion));
+  (datos.integrantes || []).forEach((i) => agregarFilaIntegrante(i.nombre, i.movil || '', i.correo || ''));
   contenido.querySelector('#fv-agregar-integrante').addEventListener('click', () => agregarFilaIntegrante());
 
   const seccionInq = contenido.querySelector('#fv-seccion-inquilino');
@@ -472,17 +464,7 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     checar();
   });
 
-  // --- Segundo correo: aparece al pulsar el botón ---
-  [['p', '#btn-p-correo2', '#cont-p-correo2'], ['i', '#btn-i-correo2', '#cont-i-correo2']].forEach(([suf, selBtn, selCont]) => {
-    const b = contenido.querySelector(selBtn);
-    if (!b) return;
-    b.addEventListener('click', () => {
-      contenido.querySelector(selCont).hidden = false;
-      b.hidden = true;
-      contenido.querySelector(`#fv-${suf}-correo2`).focus();
-    });
-  });
-
+  // --- Guardado ---
   const btnCancelar = document.createElement('button');
   btnCancelar.type = 'button';
   btnCancelar.className = 'boton';
@@ -499,7 +481,8 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     const integrantes = [...contenedorIntegrantes.querySelectorAll('.fila-integrante')]
       .map((f) => ({
         nombre: f.querySelector('.fi-nombre').value.trim(),
-        relacion: f.querySelector('.fi-relacion').value.trim(),
+        movil: f.querySelector('.fi-movil').value.trim(),
+        correo: f.querySelector('.fi-correo').value.trim(),
       }))
       .filter((i) => i.nombre);
 
@@ -531,7 +514,7 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     // necesita al menos un teléfono de los tres y al menos un correo.
     const sufijoPrincipal = (tipo === 'renta' && valor('#fv-i-nombre')) ? 'i' : 'p';
     const telPrincipal = sufijoPrincipal === 'i' ? inqTel : propTel;
-    const correoPrincipal = valor(`#fv-${sufijoPrincipal}-correo`) || valor(`#fv-${sufijoPrincipal}-correo2`);
+    const correoPrincipal = valor(`#fv-${sufijoPrincipal}-correo`);
     if (!telPrincipal.telefono) {
       toast('La persona principal necesita al menos un teléfono (móvil, casa o trabajo).', 'error');
       contenido.querySelector(`#fv-${sufijoPrincipal}-tel-movil`).focus();
@@ -547,7 +530,6 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       ? {
           nombre: valor('#fv-i-nombre'),
           correo: valor('#fv-i-correo'),
-          correo2: valor('#fv-i-correo2'),
           telefonos: inqTel.telefonos,
           telefono: inqTel.telefono,
         }
@@ -560,11 +542,10 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       propietario: {
         nombre: valor('#fv-p-nombre'),
         correo: valor('#fv-p-correo'),
-        correo2: valor('#fv-p-correo2'),
         telefonos: propTel.telefonos,
         telefono: propTel.telefono,
       },
-      inquilino: inquilino && (inquilino.nombre || inquilino.telefono || inquilino.correo || inquilino.correo2) ? inquilino : null,
+      inquilino: inquilino && (inquilino.nombre || inquilino.telefono || inquilino.correo) ? inquilino : null,
       integrantes,
       emergencia: {
         nombre: valor('#fv-e-nombre'),

@@ -39,7 +39,7 @@ Aromos» (datos ficticios de prueba) — ningún dato real queda expuesto.*
   el menú.
 - 📊 **Exportar a Excel real (.xlsx)** de viviendas: cada dato en su columna y
   fila; e **importar** desde .xlsx o .csv con revisión previa fila por fila
-  (incluye segundo correo y plantilla descargable). **Respaldo** por
+  (con plantilla descargable y soporte de CSV). **Respaldo** por
   comunidad.
 
 ## Estructura
