@@ -29,7 +29,7 @@ y aislamiento de permisos (el residente no ve notas internas ni administración)
 - [x] **Segundo administrador**: un admin puede crear más admins de su propia comunidad
 - [x] **Editar cuentas (✏️)**: superadmin edita nombre, rol y comunidad de cualquiera; el admin edita las de su comunidad (solo nombre). Nadie cambia su propio rol
 - [x] **Reestablecer mi clave de acceso (🔑)**: cada persona cambia su propia clave desde el menú (confirmando la actual); claves temporales ya no dependen del superadmin
-- [x] **Exportación / respaldos**: directorio en CSV (Excel) y respaldo completo en JSON
+- [x] **Exportación / importación / respaldos**: directorio en **Excel (.xlsx)** con cada dato en su columna y fila, **importación** desde .xlsx o .csv con revisión previa, plantilla descargable y respaldo completo en JSON
 - [x] Directorio con búsqueda y filtros
 - [x] Reglas de seguridad de Firestore (cada comunidad ve solo lo suyo)
 
@@ -38,13 +38,28 @@ y aislamiento de permisos (el residente no ve notas internas ni administración)
 > (Console → Firestore → Seguridad). Todo lo demás funciona con las reglas ya
 > publicadas.
 
-## 📦 Exportación y respaldos
+## 📦 Excel, importación y respaldos
 
-En **Viviendas** (administración): botones **⬇️ CSV** y **🗄️ Respaldo**.
+En **Viviendas** (administración): botones **⬇️ Excel**, **📥 Importar**,
+**📝 Plantilla** y **🗄️ Respaldo**.
 
-- **CSV** — el directorio completo para Excel (25 columnas: dirección, estado,
+- **⬇️ Excel** — el directorio completo como archivo **.xlsx real**: cada dato
+  en su columna y fila correspondientes (25 columnas: dirección, estado,
   propietario con sus 3 teléfonos y 2 correos, inquilino, emergencia,
-  integrantes, notas). Con BOM UTF-8 para que las tildes se vean bien.
+  integrantes, notas), con anchos de columna y filtro automático. Abre
+  perfecto en cualquier Excel, sin importar la configuración regional del
+  equipo. Incluye una segunda hoja «Guía» que explica cada columna.
+- **📝 Plantilla** — descarga `plantilla-directorio-quenda.xlsx`: los
+  encabezados exactos, dos filas de ejemplo y la hoja Guía, para llenar el
+  directorio a mano en Excel.
+- **📥 Importar** — crea o actualiza viviendas desde un archivo **.xlsx o
+  .csv** con las mismas columnas (acepta los CSV antiguos). Antes de guardar
+  nada muestra una **revisión previa** fila por fila: `NUEVA` (no existe),
+  `ACTUALIZA` (coincide calle + número), avisos suaves (código de país asumido,
+  dígitos que no concuerdan, estado dudoso…) y `DESCARTA` en rojo para filas
+  con errores (calle inexistente en Estructura, persona principal sin teléfono
+  o sin correo —la misma regla del formulario—, correo inválido). Nada entra
+  a la base hasta pulsar «Confirmar importación».
 - **JSON** — respaldo de alta fidelidad de la comunidad: comunidad, estructura,
   todas las viviendas (normalizadas, activas e inactivas) y las cuentas
   (sin claves: Firebase Auth nunca las expone).
@@ -59,8 +74,9 @@ Nombre de archivo con fecha: `respaldo-residencial-los-aromos-2026-10-28.json`.
 > fuera de la nube. Si algún día se necesita restaurar o migrar, el JSON
 > contiene todo lo necesario (se puede construir el importador cuando se requiera).
 
-**Fases siguientes (trazado en `QUENDA-trazado.md`):** Fase 2 (importación CSV,
-avisos, PDF) y Fase 3 (solicitudes de cambio de los residentes).
+**Fases siguientes (trazado en `QUENDA-trazado.md`):** la importación
+Excel/CSV con revisión previa ya quedó (2026-11-04); siguen el PDF y las
+solicitudes de cambio de los residentes.
 
 ---
 
@@ -229,5 +245,5 @@ se muestran como texto. El contacto de emergencia recibe el mismo tratamiento.
 
 ## 📌 Pendientes conocidos
 
-- Fase 2: importación Excel/CSV, avisos, PDF.
-- Fase 3: solicitudes de cambio desde el residente.
+- Fase 3: solicitudes de cambio desde el residente. (La importación Excel/CSV
+  con avisos ya quedó hecha en la ronda del 2026-11-04.)

@@ -16,7 +16,7 @@ emergencia, teléfonos con código de país, correos, WhatsApp y avisos de renta
 | Inicio de sesión | ![Login](shots/01-login.png) |
 | Directorio (tarjetas por vivienda) | ![Directorio](shots/03-directorio.png) |
 | Usuarios de la comunidad | ![Usuarios](shots/02-usuarios.png) |
-| Viviendas (con CSV y respaldo) | ![Viviendas](shots/04-viviendas.png) |
+| Viviendas (con Excel, importar y plantilla) | ![Viviendas](shots/04-viviendas.png) |
 | Editar cuenta (roles y protecciones) | ![Editar cuenta](shots/05-modal-editar.png) |
 | Cambiar mi propia clave | ![Reestablecer clave](shots/06-modal-clave.png) |
 
@@ -37,7 +37,9 @@ Aromos» (datos ficticios de prueba) — ningún dato real queda expuesto.*
 - 🔑 **Claves:** «¿Olvidaste tu clave de acceso?» envía el correo oficial de
   Firebase en español; con la sesión abierta cada quien cambia su clave desde
   el menú.
-- 📄 **Exportar CSV** de viviendas (incluye segundo correo) y **respaldo** por
+- 📊 **Exportar a Excel real (.xlsx)** de viviendas: cada dato en su columna y
+  fila; e **importar** desde .xlsx o .csv con revisión previa fila por fila
+  (incluye segundo correo y plantilla descargable). **Respaldo** por
   comunidad.
 
 ## Estructura

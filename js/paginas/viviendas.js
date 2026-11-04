@@ -6,7 +6,7 @@
 
 import { listEstructura, listViviendas, saveVivienda, deleteVivienda, viviendaNormalizada, exportarComunidad } from '../db.js';
 import { esc, toast, abrirModal, confirmar, iconoWhatsapp } from '../ui.js';
-import { descargarArchivo, slug, fechaCorta, directorioCSV } from '../exportar.js';
+import { descargarArchivo, slug, fechaCorta, descargarExcel, descargarPlantilla, leerArchivoImport, analizarImportacion } from '../exportar.js';
 import { partirTelefono, htmlOpcionesPais, digitosEsperados, paisDe } from '../paises.js';
 
 export async function render(cont, ctx) {
@@ -33,7 +33,9 @@ export async function render(cont, ctx) {
         <p class="subtitulo">${viviendas.length} viviendas registradas.</p>
       </div>
       <div class="cabecera-acciones">
-        <button class="boton" id="btn-export-csv" title="Descarga el directorio para abrir en Excel">⬇️ CSV</button>
+        <button class="boton" id="btn-export-xlsx" title="Descarga el directorio como Excel (.xlsx): cada dato en su columna y fila">⬇️ Excel</button>
+        <button class="boton" id="btn-importar" title="Crea o actualiza viviendas desde un archivo .xlsx o .csv, con revisión previa">📥 Importar</button>
+        <button class="boton" id="btn-plantilla" title="Descarga la plantilla .xlsx con las columnas exactas y ejemplos">📝 Plantilla</button>
         <button class="boton" id="btn-export-json" title="Descarga un respaldo completo de la comunidad (JSON)">🗄️ Respaldo</button>
         <button class="boton boton-primario" id="btn-nueva-vivienda">+ Nueva vivienda</button>
       </div>
@@ -132,17 +134,37 @@ export async function render(cont, ctx) {
   selTipo.addEventListener('change', aplicar);
   aplicar();
 
-  // --- Exportación / respaldos -------------------------------------
-  cont.querySelector('#btn-export-csv').addEventListener('click', () => {
-    // CSV con TODAS las viviendas (activas e inactivas), normalizadas.
-    const todas = viviendasRaw.map(viviendaNormalizada);
-    descargarArchivo(
-      `directorio-${slug(com.nombre)}-${fechaCorta()}.csv`,
-      '\ufeff' + directorioCSV({ estructura, viviendas: todas }),
-      'text/csv;charset=utf-8',
-    );
-    toast('Directorio CSV descargado', 'ok');
+  // --- Exportación / importación / respaldos -------------------------------------
+  cont.querySelector('#btn-export-xlsx').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      // Excel con TODAS las viviendas (activas e inactivas), normalizadas.
+      const todas = viviendasRaw.map(viviendaNormalizada);
+      await descargarExcel({ comunidad: com.nombre, estructura, viviendas: todas });
+      toast('Directorio Excel descargado', 'ok');
+    } catch (err) {
+      toast(err.message || 'No se pudo generar el Excel.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
   });
+
+  cont.querySelector('#btn-plantilla').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      await descargarPlantilla();
+      toast('Plantilla descargada', 'ok');
+    } catch (err) {
+      toast(err.message || 'No se pudo generar la plantilla.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  cont.querySelector('#btn-importar').addEventListener('click', () =>
+    modalImportar({ estructura, viviendasRaw, com, cont, ctx }));
 
   cont.querySelector('#btn-export-json').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
@@ -164,6 +186,132 @@ export async function render(cont, ctx) {
 
   cont.querySelector('#btn-nueva-vivienda').addEventListener('click', () =>
     formulario(null, { estructura, esTorre, cont, ctx }));
+}
+
+/* ------------------------- Importación de viviendas --------------------- */
+
+/**
+ * Modal de importación: elige archivo (.xlsx o .csv), muestra una revisión
+ * previa fila por fila (NUEVA / ACTUALIZA / ERROR) y solo al confirmar
+ * escribe en la base. Nada se guarda antes de que la persona confirme.
+ */
+function modalImportar({ estructura, viviendasRaw, com, cont, ctx }) {
+  const contenido = document.createElement('div');
+  contenido.className = 'form-grid';
+  contenido.innerHTML = `
+    <div class="campo campo-ancho">
+      <p style="margin:0 0 8px">
+        Elige un archivo <strong>.xlsx</strong> o <strong>.csv</strong> con las columnas de la plantilla
+        (la obtienes con el botón <strong>📝 Plantilla</strong>).
+        Lo que ya exista se <strong>actualiza</strong> si coincide la calle y el número; lo demás se <strong>crea</strong>.
+      </p>
+      <input id="imp-archivo" type="file" accept=".xlsx,.xls,.csv">
+      <p class="texto-suave" style="margin:6px 0 0">Nada se guarda hasta que revises la lista y confirmes.</p>
+    </div>
+    <div id="imp-previa" class="campo campo-ancho"></div>`;
+
+  const { pie, cerrar } = abrirModal({ titulo: 'Importar viviendas', contenido, ancho: 760 });
+  const inputArc = contenido.querySelector('#imp-archivo');
+  const zonaPrevia = contenido.querySelector('#imp-previa');
+
+  const btnCancelar = document.createElement('button');
+  btnCancelar.type = 'button';
+  btnCancelar.className = 'boton';
+  btnCancelar.textContent = 'Cancelar';
+  btnCancelar.addEventListener('click', cerrar);
+
+  const btnConfirmar = document.createElement('button');
+  btnConfirmar.type = 'button';
+  btnConfirmar.className = 'boton boton-primario';
+  btnConfirmar.textContent = 'Confirmar importación';
+  btnConfirmar.hidden = true;
+
+  let analisis = null;
+
+  function filaPrevia(it) {
+    const destino = it.datosGuardar
+      ? (it.existeId
+        ? '<span class="badge badge-ok">ACTUALIZA</span>'
+        : '<span class="badge badge-ok">NUEVA</span>')
+      : '<span class="badge badge-error">DESCARTA</span>';
+    const notas = [...it.errores, ...it.avisos]
+      .map((t) => `<div>${esc(t)}</div>`).join('');
+    return `
+      <tr>
+        <td>${it.fila}</td>
+        <td>${esc(it.calle || '—')} · ${esc(it.numero || '—')}</td>
+        <td>${destino}</td>
+        <td>${notas || '<span class="texto-suave">Sin observaciones</span>'}</td>
+      </tr>`;
+  }
+
+  inputArc.addEventListener('change', async () => {
+    const archivo = inputArc.files[0];
+    if (!archivo) return;
+    zonaPrevia.innerHTML = '<p class="texto-suave">Leyendo el archivo…</p>';
+    btnConfirmar.hidden = true;
+    try {
+      const datos = await leerArchivoImport(archivo);
+      analisis = analizarImportacion({
+        encabezados: datos.encabezados,
+        filas: datos.filas,
+        estructura,
+        existentes: viviendasRaw.map(viviendaNormalizada),
+      });
+      if (!analisis.resumen.reconocidas.length) {
+        throw new Error('El archivo no tiene las columnas del directorio (Ubicación, Dirección, Estado…). Usa la plantilla 📝 como guión.');
+      }
+      const r = analisis.resumen;
+      const guardar = r.nuevas + r.actualizan;
+      zonaPrevia.innerHTML = `
+        <div class="imp-resumen">
+          <span class="badge badge-ok">${r.nuevas} nuevas</span>
+          <span class="badge badge-aviso">${r.actualizan} para actualizar</span>
+          ${r.conAvisos ? `<span class="badge badge-renta">${r.conAvisos} con avisos</span>` : ''}
+          ${r.descartadas ? `<span class="badge badge-error">${r.descartadas} con errores (no se guardarán)</span>` : ''}
+        </div>
+        <div class="imp-tabla">
+          <table>
+            <thead><tr><th>Fila</th><th>Calle · Casa</th><th>Se hará</th><th>Detalle</th></tr></thead>
+            <tbody>${analisis.items.map(filaPrevia).join('')}</tbody>
+          </table>
+        </div>
+        ${guardar ? '' : '<p class="texto-error" style="text-align:left">Ninguna fila se puede guardar; corrige el archivo y vuelve a importarlo.</p>'}`;
+      btnConfirmar.hidden = guardar === 0;
+    } catch (err) {
+      zonaPrevia.innerHTML = '';
+      toast(err.message || 'No se pudo leer el archivo.', 'error');
+    }
+  });
+
+  btnConfirmar.addEventListener('click', async () => {
+    if (!analisis) return;
+    const aGuardar = analisis.items.filter((i) => i.datosGuardar);
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Guardando…';
+    let nuevas = 0;
+    let actualizadas = 0;
+    let fallidas = 0;
+    for (const it of aGuardar) {
+      try {
+        await saveVivienda(com.id, it.datosGuardar, it.existeId || null);
+        if (it.existeId) actualizadas += 1;
+        else nuevas += 1;
+      } catch (err) {
+        fallidas += 1;
+        console.error('Vivienda no importada (fila ' + it.fila + '):', err);
+      }
+    }
+    cerrar();
+    toast(
+      `Importación lista: ${nuevas} nuevas, ${actualizadas} actualizadas.`
+      + (fallidas ? ` ${fallidas} no pudieron guardarse.` : ''),
+      fallidas ? 'error' : 'ok',
+    );
+    render(cont, ctx);
+  });
+
+  pie.append(btnCancelar, btnConfirmar);
 }
 
 /* ------------------------- Formulario vivienda ------------------------- */
