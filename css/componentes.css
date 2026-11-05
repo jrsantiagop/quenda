@@ -90,6 +90,16 @@
 }
 .titulo-grupo { grid-column: 1 / -1; margin: 0 0 2px; font-size: 13.5px; }
 
+/* Fila de título con su botón «＋» al lado (secciones de integrantes) */
+.titulo-fila {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.titulo-fila .titulo-grupo { margin: 0; grid-column: auto; }
+
 /* Campo de teléfono: selector de país + número */
 .campo-tel { display: flex; gap: 6px; align-items: stretch; }
 .campo-tel .tel-pais { width: 132px; flex-shrink: 0; }
@@ -103,18 +113,32 @@
 }
 
 .fila-integrante {
+  grid-column: 1 / -1;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  background: var(--blanco);
+  padding: 10px 12px;
   display: grid;
-  grid-template-columns: 1.4fr 1.6fr auto;
+  grid-template-columns: 1fr;
   gap: 8px;
-  margin-bottom: 6px;
-  align-items: center;
 }
 .fila-integrante input {
   border: 1px solid var(--borde);
   border-radius: 6px;
-  padding: 7px 9px;
+  padding: 9px 11px;
   font-size: 13.5px;
   width: 100%;
+}
+.fi-cab { display: flex; gap: 8px; align-items: stretch; }
+.fi-cab .fi-nombre { flex: 1; font-weight: 600; }
+.fi-cab button { flex-shrink: 0; }
+.fi-linea {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 620px) {
+  .fi-linea { grid-template-columns: 1fr; }
 }
 
 /* ------------------------- Cabecera página -------------------------- */

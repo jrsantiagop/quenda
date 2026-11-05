@@ -366,6 +366,12 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       ${campoTelefono('p', 'movil', datos.propietario.telefonos.movil, 'Móvil (WhatsApp)')}
       ${campoTelefono('p', 'casa', datos.propietario.telefonos.casa, 'Casa')}
       ${campoTelefono('p', 'trabajo', datos.propietario.telefonos.trabajo, 'Trabajo')}
+
+      <div class="titulo-fila">
+        <h4 class="titulo-grupo">👥 Integrantes del hogar</h4>
+        <button type="button" class="boton boton-mini" id="fv-agregar-integrante-p" title="Agregar integrante (referencia del propietario)">＋</button>
+      </div>
+      <div id="fv-integrantes-p" class="campo-ancho"></div>
     </div>
 
     <div class="grupo-campos campo-ancho" id="fv-seccion-inquilino">
@@ -373,13 +379,14 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       <div class="campo"><label>Nombre</label><input id="fv-i-nombre" value="${esc(datos.inquilino ? datos.inquilino.nombre : '')}"></div>
       <div class="campo"><label>Correo electrónico</label><input id="fv-i-correo" type="email" value="${esc(datos.inquilino ? datos.inquilino.correo : '')}"></div>
       ${campoTelefono('i', 'movil', datos.inquilino ? datos.inquilino.telefonos.movil : '', 'Móvil (WhatsApp)')}
+      ${campoTelefono('i', 'casa', datos.inquilino ? datos.inquilino.telefonos.casa : '', 'Casa')}
       ${campoTelefono('i', 'trabajo', datos.inquilino ? datos.inquilino.telefonos.trabajo : '', 'Trabajo')}
-    </div>
 
-    <div class="grupo-campos campo-ancho">
-      <h4 class="titulo-grupo">👥 Integrantes del hogar</h4>
-      <div id="fv-integrantes"></div>
-      <button type="button" class="boton boton-mini" id="fv-agregar-integrante">+ Agregar integrante</button>
+      <div class="titulo-fila">
+        <h4 class="titulo-grupo">👥 Integrantes del hogar (inquilino)</h4>
+        <button type="button" class="boton boton-mini" id="fv-agregar-integrante-i" title="Agregar integrante del inquilino">＋</button>
+      </div>
+      <div id="fv-integrantes-i" class="campo-ancho"></div>
     </div>
 
     <div class="grupo-campos campo-ancho">
@@ -418,20 +425,28 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     ancho: 640,
   });
 
-  const contenedorIntegrantes = contenido.querySelector('#fv-integrantes');
-  function agregarFilaIntegrante(nombre = '', movil = '', correo = '') {
+  const contenedorIntegrantesP = contenido.querySelector('#fv-integrantes-p');
+  const contenedorIntegrantesI = contenido.querySelector('#fv-integrantes-i');
+  function agregarFilaIntegrante(contenedor, nombre = '', movil = '', correo = '') {
     const fila = document.createElement('div');
     fila.className = 'fila-integrante';
     fila.innerHTML = `
-      <input class="fi-nombre" placeholder="Nombre" value="${esc(nombre)}">
-      <input class="fi-movil" placeholder="Móvil (Ej: +52 55 1234 5678)" inputmode="tel" value="${esc(movil)}">
-      <input class="fi-correo" placeholder="Correo" type="email" value="${esc(correo)}">
-      <button type="button" class="boton boton-mini boton-peligro" title="Quitar">✕</button>`;
+      <div class="fi-cab">
+        <input class="fi-nombre" placeholder="Nombre completo" value="${esc(nombre)}">
+        <button type="button" class="boton boton-mini boton-peligro" title="Quitar integrante">✕</button>
+      </div>
+      <div class="fi-linea">
+        <input class="fi-movil" placeholder="Móvil (Ej: +52 55 1234 5678)" inputmode="tel" value="${esc(movil)}">
+        <input class="fi-correo" placeholder="Correo (Ej: persona@correo.com)" type="email" value="${esc(correo)}">
+      </div>`;
     fila.querySelector('button').addEventListener('click', () => fila.remove());
-    contenedorIntegrantes.appendChild(fila);
+    contenedor.appendChild(fila);
   }
-  (datos.integrantes || []).forEach((i) => agregarFilaIntegrante(i.nombre, i.movil || '', i.correo || ''));
-  contenido.querySelector('#fv-agregar-integrante').addEventListener('click', () => agregarFilaIntegrante());
+  (datos.integrantes || []).forEach((i) => agregarFilaIntegrante(contenedorIntegrantesP, i.nombre, i.movil || '', i.correo || ''));
+  const referenciaInquilino = datos.integrantesInquilino || (datos.inquilino ? datos.inquilino.integrantes : null) || [];
+  referenciaInquilino.forEach((i) => agregarFilaIntegrante(contenedorIntegrantesI, i.nombre, i.movil || '', i.correo || ''));
+  contenido.querySelector('#fv-agregar-integrante-p').addEventListener('click', () => agregarFilaIntegrante(contenedorIntegrantesP));
+  contenido.querySelector('#fv-agregar-integrante-i').addEventListener('click', () => agregarFilaIntegrante(contenedorIntegrantesI));
 
   const seccionInq = contenido.querySelector('#fv-seccion-inquilino');
   const selTipo = contenido.querySelector('#fv-tipo');
@@ -478,13 +493,15 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
   btnGuardar.addEventListener('click', async () => {
     const valor = (id) => contenido.querySelector(id).value.trim();
     const tipo = selTipo.value;
-    const integrantes = [...contenedorIntegrantes.querySelectorAll('.fila-integrante')]
+    const leerIntegrantes = (contenedor) => [...contenedor.querySelectorAll('.fila-integrante')]
       .map((f) => ({
         nombre: f.querySelector('.fi-nombre').value.trim(),
         movil: f.querySelector('.fi-movil').value.trim(),
         correo: f.querySelector('.fi-correo').value.trim(),
       }))
       .filter((i) => i.nombre);
+    const integrantes = leerIntegrantes(contenedorIntegrantesP);
+    const integrantesInquilino = leerIntegrantes(contenedorIntegrantesI);
 
     // Arma el bloque de teléfonos: selector de país + número local.
     function telefonosDe(sufijo) {
@@ -547,6 +564,7 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       },
       inquilino: inquilino && (inquilino.nombre || inquilino.telefono || inquilino.correo) ? inquilino : null,
       integrantes,
+      integrantesInquilino: tipo === 'renta' ? integrantesInquilino : [],
       emergencia: {
         nombre: valor('#fv-e-nombre'),
         telefonos: emeTel.telefonos,

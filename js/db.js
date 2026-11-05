@@ -417,6 +417,7 @@ export function viviendaNormalizada(v) {
     propietario: persona(v.propietario),
     inquilino: v.inquilino ? persona(v.inquilino) : null,
     integrantes: Array.isArray(v.integrantes) ? v.integrantes : [],
+    integrantesInquilino: Array.isArray(v.integrantesInquilino) ? v.integrantesInquilino : [],
     emergencia,
     esColaboradorVecinal: !!v.esColaboradorVecinal,
     oficio: v.oficio || '',
