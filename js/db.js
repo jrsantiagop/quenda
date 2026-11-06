@@ -391,7 +391,7 @@ export function viviendaNormalizada(v) {
   // Una persona admite hasta 3 teléfonos: casa, trabajo y móvil.
   // Compatibilidad: si el registro antiguo trae solo "telefono", pasa a móvil.
   function persona(p) {
-    const base = { nombre: '', correo: '', correo2: '', ...(p || {}) };
+    const base = { nombre: '', correo: '', correo2: '', correo3: '', ...(p || {}) };
     const t = base.telefonos || {};
     const telefonos = {
       casa: String(t.casa || '').trim(),

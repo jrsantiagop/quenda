@@ -72,8 +72,8 @@ export function cargarXLSX() {
  */
 export const COLUMNAS_DIRECTORIO = [
   'Ubicación', 'Dirección', 'Estado',
-  'Propietario', 'Móvil propietario', 'Casa propietario', 'Trabajo propietario', 'Correo propietario',
-  'Inquilino', 'Móvil inquilino', 'Casa inquilino', 'Trabajo inquilino', 'Correo inquilino',
+  'Propietario', 'Móvil propietario', 'Casa propietario', 'Trabajo propietario', 'Correo propietario', 'Correo 2 propietario', 'Correo 3 propietario',
+  'Inquilino', 'Móvil inquilino', 'Casa inquilino', 'Trabajo inquilino', 'Correo inquilino', 'Correo 2 inquilino', 'Correo 3 inquilino',
   'Emergencia', 'Móvil emergencia', 'Casa emergencia', 'Trabajo emergencia', 'Tipo de sangre', 'Relación',
   'Integrantes', 'Integrantes móviles', 'Integrantes correos',
   'Integrantes inquilino', 'Integrantes inquilino móviles', 'Integrantes inquilino correos',
@@ -103,8 +103,8 @@ export function filasDirectorio({ estructura = [], viviendas = [] }) {
       nombreDe(v.ubicaId),
       v.numero || '',
       estadoTexto(v),
-      p.nombre || '', tP.movil || '', tP.casa || '', tP.trabajo || '', p.correo || '',
-      i.nombre || '', tI.movil || '', tI.casa || '', tI.trabajo || '', i.correo || '',
+      p.nombre || '', tP.movil || '', tP.casa || '', tP.trabajo || '', p.correo || '', p.correo2 || '', p.correo3 || '',
+      i.nombre || '', tI.movil || '', tI.casa || '', tI.trabajo || '', i.correo || '', i.correo2 || '', i.correo3 || '',
       e.nombre || '', tE.movil || '', tE.casa || '', tE.trabajo || '', e.tipoSangre || '', e.relacion || '',
       (v.integrantes || []).map((x) => (x.nombre || '')).join('; '),
       (v.integrantes || []).map((x) => (x.movil || '')).join('; '),
@@ -128,8 +128,8 @@ const GUIA_FILAS = [
   ['Dirección', 'Número de casa o de apartamento. Junto con la Ubicación identifica la vivienda.'],
   ['Estado', 'Propia, En renta, Vacante o Inactiva. Si va vacío se toma como Propia.'],
   ['Propietario', 'Nombre del propietario.'],
-  ['Móvil / Casa / Trabajo', 'Teléfonos con código de país, ejemplo: +52 55 1234 5678. Sin código se asume +52 (México).'],
-  ['Correo', 'La persona principal necesita al menos un correo para poder guardarse.'],
+  ['Móvil / Casa / Trabajo', 'Los teléfonos de la persona, en orden: Móvil, Casa y Trabajo. Con código de país, ejemplo: +52 55 1234 5678. El primero es el que muestra WhatsApp.'],
+  ['Correo 1, 2 y 3', 'La persona principal necesita al menos un correo para poder guardarse. Los tres correos se leen en orden.'],
   ['Inquilino', 'Solo llenar cuando el Estado es «En renta». Nombre y datos de contacto del inquilino.'],
   ['Emergencia', 'Contacto de emergencia opcional: nombre, teléfonos, tipo de sangre y relación.'],
   ['Integrantes', 'Referencias del PROPIETARIO: solo sus nombres, separados por punto y coma. Ej.: Ana Pérez; Luis Pérez.'],
@@ -147,7 +147,7 @@ const GUIA_FILAS = [
 /* --------------------------- Exportación ---------------------------- */
 
 /** Anchos de columna (en caracteres) para que el Excel se lea cómodo. */
-const ANCHOS_DIRECTORIO = [18, 14, 10, 24, 18, 18, 18, 30, 24, 18, 18, 18, 30, 24, 18, 18, 18, 10, 16, 30, 28, 30, 30, 28, 30, 12, 24, 44];
+const ANCHOS_DIRECTORIO = [18, 14, 10, 24, 18, 18, 18, 30, 30, 30, 24, 18, 18, 18, 30, 30, 30, 24, 18, 18, 18, 10, 16, 30, 28, 30, 30, 28, 30, 12, 24, 44];
 
 /** Arma el libro con hoja de datos + hoja Guía y dispara la descarga. */
 async function guardarConGuia(nombreArchivo, filas) {
@@ -179,14 +179,14 @@ export async function descargarExcel({ comunidad = '', estructura = [], vivienda
 /** Plantilla con encabezados, dos ejemplos y la hoja Guía. */
 export async function descargarPlantilla() {
   const ejemplo = [
-    ['Calle Principal', '1', 'Propia', 'Pedro Ejemplo', '+52 55 1234 5678', '', '', 'pedro@ejemplo.com',
-      '', '', '', '', '',
+    ['Calle Principal', '1', 'Propia', 'Pedro Ejemplo', '+52 55 1234 5678', '', '', 'pedro@ejemplo.com', '', '',
+      '', '', '', '', '', '', '',
       'Laura Ejemplo', '+52 55 8765 4321', '', '', 'O+', 'Esposa',
       'Sofía Ejemplo; Ana Ejemplo', '+52 55 3344 5566; +52 55 7788 9900', 'sofia@ejemplo.com; ana@ejemplo.com',
       '', '', '',
       'Sí', 'Enfermera', ''],
-    ['Calle Principal', '2', 'En renta', 'Marta Dueños', '+52 55 6600 1122', '', '', 'marta@ejemplo.com',
-      'Ana Inquilina', '+52 55 9900 1122', '', '', 'ana@ejemplo.com',
+    ['Calle Principal', '2', 'En renta', 'Marta Dueños', '+52 55 6600 1122', '', '', 'marta@ejemplo.com', '', '',
+      'Ana Inquilina', '+52 55 9900 1122', '', '', 'ana@ejemplo.com', 'ana2@ejemplo.com', '',
       'Jorge Ayuda', '+52 55 5566 7788', '', '', 'O+', 'Hijo de la inquilina',
       '', '', '',
       'Referencia Inquilino', '+52 55 2233 4455', 'referencia@ejemplo.com',
@@ -206,11 +206,15 @@ const MAPA_COLUMNAS = {
   'casa propietario': 'p.casa',
   'trabajo propietario': 'p.trabajo',
   'correo propietario': 'p.correo',
+  'correo 2 propietario': 'p.correo2',
+  'correo 3 propietario': 'p.correo3',
   'inquilino': 'i.nombre',
   'movil inquilino': 'i.movil',
   'casa inquilino': 'i.casa',
   'trabajo inquilino': 'i.trabajo',
   'correo inquilino': 'i.correo',
+  'correo 2 inquilino': 'i.correo2',
+  'correo 3 inquilino': 'i.correo3',
   'emergencia': 'e.nombre',
   'movil emergencia': 'e.movil',
   'casa emergencia': 'e.casa',
@@ -350,13 +354,15 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
       t.casa.avisos.forEach((a) => item.avisos.push(a));
       t.trabajo.avisos.forEach((a) => item.avisos.push(a));
       const telefonos = { movil: t.movil.valor, casa: t.casa.valor, trabajo: t.trabajo.valor };
-      const correo = v[`${prefijo}.correo`] || '';
-      if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        item.errores.push(`${etiquetas.nombre}: el correo «${correo}» no parece válido.`);
-      }
+      const correos = [v[`${prefijo}.correo`] || '', v[`${prefijo}.correo2`] || '', v[`${prefijo}.correo3`] || ''];
+      correos.forEach((c, i) => {
+        if (c && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) {
+          item.errores.push(`${etiquetas.nombre}: el correo${i ? ` ${i + 1}` : ''} «${c}» no parece válido.`);
+        }
+      });
       return {
         nombre: v[`${prefijo}.nombre`] || '',
-        correo, telefonos,
+        correo: correos[0], correo2: correos[1], correo3: correos[2], telefonos,
         telefono: telefonos.movil || telefonos.casa || telefonos.trabajo || '',
       };
     }
@@ -370,10 +376,12 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
     // El inquilino solo entra cuando la vivienda está en renta (igual que el formulario).
     let inquilino = null;
     if (tipo === 'renta') {
-      const conDatos = inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo;
+      const conDatos = inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo
+        || inquilinoDatos.correo2 || inquilinoDatos.correo3;
       if (conDatos) inquilino = inquilinoDatos;
       else item.avisos.push('El estado es En renta pero no hay datos de inquilino.');
-    } else if (inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo) {
+    } else if (inquilinoDatos.nombre || inquilinoDatos.telefono || inquilinoDatos.correo
+      || inquilinoDatos.correo2 || inquilinoDatos.correo3) {
       item.avisos.push('Los datos de inquilino se ignoraron porque el estado no es En renta.');
     }
 
@@ -382,7 +390,9 @@ export function analizarImportacion({ encabezados = [], filas = [], estructura =
     const principal = (tipo === 'renta' && inquilino && inquilino.nombre) ? inquilino : propietario;
     const etiquetaPrincipal = principal === inquilino ? 'el inquilino' : 'el propietario';
     if (!principal.telefono) item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un teléfono.`);
-    if (!principal.correo) item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un correo.`);
+    if (!principal.correo && !principal.correo2 && !principal.correo3) {
+      item.errores.push(`La persona principal (${etiquetaPrincipal}) necesita al menos un correo.`);
+    }
 
     // Integrantes: tres columnas paralelas (nombres, móviles, correos),
     // cada una separada por punto y coma y alineada por posición.

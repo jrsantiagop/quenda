@@ -112,6 +112,46 @@
   .grupo-campos { grid-template-columns: 1fr; }
 }
 
+/* Fichas de teléfonos y correos (propietario e inquilino), mismo
+   estilo que las de integrantes: tarjeta con borde, holgadas. */
+.fila-telefono {
+  grid-column: 1 / -1;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  background: var(--blanco);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fila-telefono .campo-tel { flex: 1; }
+.fila-telefono .aviso-tel { flex-shrink: 0; width: 160px; }
+.fila-telefono button { flex-shrink: 0; }
+.fila-correo {
+  grid-column: 1 / -1;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  background: var(--blanco);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fila-correo input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 13.5px;
+  width: 100%;
+}
+.fila-correo button { flex-shrink: 0; }
+@media (max-width: 620px) {
+  .fila-telefono { flex-wrap: wrap; }
+  .fila-telefono .aviso-tel { width: 100%; order: 3; }
+}
+
 .fila-integrante {
   grid-column: 1 / -1;
   border: 1px solid var(--borde);

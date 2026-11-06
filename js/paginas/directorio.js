@@ -99,19 +99,24 @@ export async function render(cont, ctx) {
   function bloquePersona(titulo, p, principal) {
     if (!p) return '';
     const t = p.telefonos || { casa: '', trabajo: '', movil: '', };
-    if (!p.nombre && !t.movil && !t.casa && !t.trabajo && !p.correo) return '';
+    if (!p.nombre && !t.movil && !t.casa && !t.trabajo && !p.correo && !p.correo2 && !p.correo3) return '';
 
-    // Números como texto fijo (sin enlaces). El móvil lleva el logo de WhatsApp.
+    // Los teléfonos van en orden (máximo 3); el primero lleva WhatsApp.
+    // Números como texto fijo (sin enlaces).
     const filasTel = [
       t.movil ? `<span>${iconoWhatsapp('#25D366')} <span class="num-tel">${esc(t.movil)}</span></span>` : '',
-      t.casa ? `<span>🏠 <span class="num-tel">${esc(t.casa)}</span></span>` : '',
-      t.trabajo ? `<span>💼 <span class="num-tel">${esc(t.trabajo)}</span></span>` : '',
+      t.casa ? `<span>📞 <span class="num-tel">${esc(t.casa)}</span></span>` : '',
+      t.trabajo ? `<span>📞 <span class="num-tel">${esc(t.trabajo)}</span></span>` : '',
     ].filter(Boolean).join('');
+
+    const correo = p.correo || p.correo2 || p.correo3 || '';
+    const filasCorreo = [p.correo, p.correo2, p.correo3].filter(Boolean)
+      .map((c) => `✉️ ${esc(c)}`).join('');
 
     const wa = t.movil ? `https://wa.me/${t.movil.replace(/\D/g, '')}` : '';
     const acciones = [
       wa ? `<a class="boton boton-mini boton-wa" href="${esc(wa)}" target="_blank" rel="noopener">${iconoWhatsapp('#ffffff', 'icono-wa icono-boton')} WhatsApp</a>` : '',
-      p.correo ? `<a class="boton boton-mini boton-correo" href="mailto:${esc(p.correo)}">✉️ Correo</a>` : '',
+      correo ? `<a class="boton boton-mini boton-correo" href="mailto:${esc(correo)}">✉️ Correo</a>` : '',
     ].filter(Boolean).join('');
 
     return `
@@ -122,7 +127,7 @@ export async function render(cont, ctx) {
         </div>
         <div class="persona-datos">
           ${filasTel}
-          ${p.correo ? `<span>✉️ ${esc(p.correo)}</span>` : ''}
+          ${filasCorreo}
         </div>
         ${acciones ? `<div class="persona-acciones">${acciones}</div>` : ''}
       </div>`;
