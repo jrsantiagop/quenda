@@ -112,21 +112,21 @@
   .grupo-campos { grid-template-columns: 1fr; }
 }
 
-/* Fichas de teléfonos y correos (propietario e inquilino), mismo
-   estilo que las de integrantes: tarjeta con borde, holgadas. */
-.fila-telefono {
-  grid-column: 1 / -1;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-mini);
-  background: var(--blanco);
-  padding: 10px 12px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/* Iconos clicables del formulario: WhatsApp (wa.me) y correo (mailto) */
+.icono-clicable {
+  cursor: pointer;
+  vertical-align: -3px;
+  margin-right: 2px;
 }
-.fila-telefono .campo-tel { flex: 1; }
-.fila-telefono .aviso-tel { flex-shrink: 0; width: 160px; }
-.fila-telefono button { flex-shrink: 0; }
+.icono-clicable:hover { opacity: 0.75; }
+.abrir-correo {
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.abrir-correo:hover { opacity: 0.75; }
+
 .fila-correo {
   grid-column: 1 / -1;
   border: 1px solid var(--borde);
@@ -147,10 +147,6 @@
   width: 100%;
 }
 .fila-correo button { flex-shrink: 0; }
-@media (max-width: 620px) {
-  .fila-telefono { flex-wrap: wrap; }
-  .fila-telefono .aviso-tel { width: 100%; order: 3; }
-}
 
 .fila-integrante {
   grid-column: 1 / -1;

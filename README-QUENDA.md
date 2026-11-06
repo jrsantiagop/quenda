@@ -21,7 +21,8 @@ y aislamiento de permisos (el residente no ve notas internas ni administración)
 - [x] Estructura configurable por comunidad (calles con casas o torres con apartamentos)
 - [x] Viviendas con propietario, inquilino (en renta), integrantes, emergencia, notas internas
 - [x] **Hasta 3 teléfonos por persona (casa, trabajo, móvil)** con **selector de código de país** (~180 países, +52 México predeterminado) y aviso suave de dígitos esperados
-- [x] **Un correo por persona** (y 3 teléfonos por persona: casa, trabajo, móvil con selector de código de país, +52 México predeterminado, con aviso suave de dígitos esperados)
+- [x] **3 teléfonos fijos por persona (Móvil con WhatsApp, Casa, Trabajo)** con **selector de código de país** (~180 países, +52 México predeterminado) y aviso suave de dígitos esperados. El **icono de WhatsApp del formulario es un botón** que abre `wa.me` con el número escrito
+- [x] **Hasta 3 correos por persona** (propietario e inquilino) con fichas agregables «＋» y botón ✉️ que abre la app de correo
 - [x] **Regla de guardado**: la persona principal (inquilino si hay renta con inquilino; si no, propietario) necesita **al menos un teléfono y un correo** para guardar
 - [x] **Directorio de solo lectura**: los números son texto fijo (sin enlaces ni botón "Llamar"); botón verde de **WhatsApp** (logo oficial) solo cuando hay móvil, y botón de Correo
 - [x] **Logo QUENDA** (PNG oficial con transparencia) en login, menú y favicon + crédito «Diseñada por PC Supportnet»

@@ -101,12 +101,12 @@ export async function render(cont, ctx) {
     const t = p.telefonos || { casa: '', trabajo: '', movil: '', };
     if (!p.nombre && !t.movil && !t.casa && !t.trabajo && !p.correo && !p.correo2 && !p.correo3) return '';
 
-    // Los teléfonos van en orden (máximo 3); el primero lleva WhatsApp.
-    // Números como texto fijo (sin enlaces).
+    // Números como texto fijo (sin enlaces); el teléfono de casa lleva 🏠 y
+    // el de trabajo 💼; el móvil lleva el logo de WhatsApp.
     const filasTel = [
       t.movil ? `<span>${iconoWhatsapp('#25D366')} <span class="num-tel">${esc(t.movil)}</span></span>` : '',
-      t.casa ? `<span>📞 <span class="num-tel">${esc(t.casa)}</span></span>` : '',
-      t.trabajo ? `<span>📞 <span class="num-tel">${esc(t.trabajo)}</span></span>` : '',
+      t.casa ? `<span>🏠 <span class="num-tel">${esc(t.casa)}</span></span>` : '',
+      t.trabajo ? `<span>💼 <span class="num-tel">${esc(t.trabajo)}</span></span>` : '',
     ].filter(Boolean).join('');
 
     const correo = p.correo || p.correo2 || p.correo3 || '';

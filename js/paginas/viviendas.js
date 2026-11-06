@@ -316,11 +316,14 @@ function modalImportar({ estructura, viviendasRaw, com, cont, ctx }) {
 
 /* ------------------------- Formulario vivienda ------------------------- */
 
-/** Campo de teléfono: selector de código de país + número local + aviso suave. */
+/** Campo de teléfono: selector de código de país + número local + aviso suave.
+ *  El icono de WhatsApp es un botón: abre wa.me con el número tal como se escribió. */
 function campoTelefono(sufijo, tipo, valorCompleto, etiqueta) {
   const { codigo, numero } = partirTelefono(valorCompleto);
   const id = `fv-${sufijo}-tel-${tipo}`;
-  const icono = tipo === 'movil' ? iconoWhatsapp('#25D366', 'icono-wa icono-label') : tipo === 'casa' ? '🏠' : '💼';
+  const icono = tipo === 'movil'
+    ? `<a href="#" class="abrir-wa" title="Abrir WhatsApp con este número">${iconoWhatsapp('#25D366', 'icono-wa icono-label icono-clicable')}</a>`
+    : tipo === 'casa' ? '🏠' : '💼';
   return `
     <div class="campo">
       <label for="${id}">${icono} ${esc(etiqueta)}${tipo === 'trabajo' ? ' (opcional)' : ''}</label>
@@ -362,15 +365,12 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     <div class="grupo-campos campo-ancho">
       <h4 class="titulo-grupo">👤 Propietario</h4>
       <div class="campo"><label>Nombre</label><input id="fv-p-nombre" value="${esc(datos.propietario.nombre)}"></div>
+      ${campoTelefono('p', 'movil', datos.propietario.telefonos.movil, 'Móvil (WhatsApp)')}
+      ${campoTelefono('p', 'casa', datos.propietario.telefonos.casa, 'Casa')}
+      ${campoTelefono('p', 'trabajo', datos.propietario.telefonos.trabajo, 'Trabajo')}
 
       <div class="titulo-fila">
-        <h4 class="titulo-grupo">📞 Teléfonos</h4>
-        <button type="button" class="boton boton-mini" id="fv-tel-mas-p" title="Agregar teléfono">＋</button>
-      </div>
-      <div id="fv-tels-p" class="campo-ancho"></div>
-
-      <div class="titulo-fila">
-        <h4 class="titulo-grupo">✉️ Correos</h4>
+        <h4 class="titulo-grupo">✉️ Correos (hasta 3)</h4>
         <button type="button" class="boton boton-mini" id="fv-correo-mas-p" title="Agregar correo">＋</button>
       </div>
       <div id="fv-correos-p" class="campo-ancho"></div>
@@ -385,15 +385,12 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     <div class="grupo-campos campo-ancho" id="fv-seccion-inquilino">
       <h4 class="titulo-grupo">🔑 Inquilino (arrendatario)</h4>
       <div class="campo"><label>Nombre</label><input id="fv-i-nombre" value="${esc(datos.inquilino ? datos.inquilino.nombre : '')}"></div>
+      ${campoTelefono('i', 'movil', datos.inquilino ? datos.inquilino.telefonos.movil : '', 'Móvil (WhatsApp)')}
+      ${campoTelefono('i', 'casa', datos.inquilino ? datos.inquilino.telefonos.casa : '', 'Casa')}
+      ${campoTelefono('i', 'trabajo', datos.inquilino ? datos.inquilino.telefonos.trabajo : '', 'Trabajo')}
 
       <div class="titulo-fila">
-        <h4 class="titulo-grupo">📞 Teléfonos</h4>
-        <button type="button" class="boton boton-mini" id="fv-tel-mas-i" title="Agregar teléfono">＋</button>
-      </div>
-      <div id="fv-tels-i" class="campo-ancho"></div>
-
-      <div class="titulo-fila">
-        <h4 class="titulo-grupo">✉️ Correos</h4>
+        <h4 class="titulo-grupo">✉️ Correos (hasta 3)</h4>
         <button type="button" class="boton boton-mini" id="fv-correo-mas-i" title="Agregar correo">＋</button>
       </div>
       <div id="fv-correos-i" class="campo-ancho"></div>
@@ -496,56 +493,49 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
   }
   contenido.querySelectorAll('.campo-tel').forEach(cablearAviso);
 
-  // --- Listas de teléfonos y correos del propietario y del inquilino ---
-  // Máximo 3 de cada; el primero es el que muestra WhatsApp en el directorio.
-  let nTelFicha = 0;
-  function agregarFilaTelefono(prefijo, valorCompleto) {
-    const contenedor = contenido.querySelector(`#fv-tels-${prefijo}`);
-    nTelFicha += 1;
-    const idInput = `fv-${prefijo}-tel-d${nTelFicha}`;
-    const { codigo, numero } = partirTelefono(valorCompleto);
-    const fila = document.createElement('div');
-    fila.className = 'fila-telefono';
-    fila.innerHTML = `
-      <div class="campo-tel">
-        <select class="tel-pais">${htmlOpcionesPais(codigo)}</select>
-        <input class="ft-numero" id="${idInput}" value="${esc(numero)}" inputmode="tel" placeholder="Ej: 55 1234 5678">
-      </div>
-      <small class="aviso-tel" data-aviso-para="${idInput}" hidden></small>
-      <button type="button" class="boton boton-mini boton-peligro" title="Quitar teléfono">✕</button>`;
-    fila.querySelector('button').addEventListener('click', () => { fila.remove(); refrescarMas(prefijo); });
-    cablearAviso(fila.querySelector('.campo-tel'));
-    contenedor.appendChild(fila);
-  }
+  // --- Icono de WhatsApp = botón: abre wa.me con el número escrito ---
+  contenido.querySelectorAll('.abrir-wa').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const grupo = a.closest('.campo').querySelector('.campo-tel');
+      const cod = grupo.querySelector('.tel-pais').value;
+      const numero = grupo.querySelector('input').value.trim();
+      if (!numero) { toast('Escribe primero el número de teléfono.', 'error'); return; }
+      window.open(`https://wa.me/${(cod + numero).replace(/\D/g, '')}`, '_blank', 'noopener');
+    });
+  });
+
+  // --- Listas de correos del propietario y del inquilino (hasta 3) ---
   function agregarFilaCorreo(prefijo, valor) {
     const contenedor = contenido.querySelector(`#fv-correos-${prefijo}`);
     const fila = document.createElement('div');
     fila.className = 'fila-correo';
     fila.innerHTML = `
+      <a href="#" class="abrir-correo" title="Abrir tu app de correo con esta dirección">✉️</a>
       <input type="email" class="fc-correo" placeholder="Ej: persona@correo.com" value="${esc(valor)}">
       <button type="button" class="boton boton-mini boton-peligro" title="Quitar correo">✕</button>`;
+    fila.querySelector('.abrir-correo').addEventListener('click', (e) => {
+      e.preventDefault();
+      const v = fila.querySelector('.fc-correo').value.trim();
+      if (!v) { toast('Escribe primero el correo electrónico.', 'error'); return; }
+      window.open(`mailto:${v}`, '_blank');
+    });
     fila.querySelector('button').addEventListener('click', () => { fila.remove(); refrescarMas(prefijo); });
     contenedor.appendChild(fila);
   }
   function refrescarMas(prefijo) {
-    const btnTel = contenido.querySelector(`#fv-tel-mas-${prefijo}`);
     const btnCorreo = contenido.querySelector(`#fv-correo-mas-${prefijo}`);
-    btnTel.hidden = contenido.querySelectorAll(`#fv-tels-${prefijo} .fila-telefono`).length >= 3;
     btnCorreo.hidden = contenido.querySelectorAll(`#fv-correos-${prefijo} .fila-correo`).length >= 3;
   }
-  function cargarContacto(prefijo, persona) {
+  function cargarCorreos(prefijo, persona) {
     const p = persona || {};
-    [p.telefonos && p.telefonos.movil, p.telefonos && p.telefonos.casa, p.telefonos && p.telefonos.trabajo]
-      .filter(Boolean).forEach((x) => agregarFilaTelefono(prefijo, String(x).trim()));
     [p.correo, p.correo2, p.correo3].filter(Boolean).forEach((c) => agregarFilaCorreo(prefijo, c));
-    if (!contenido.querySelectorAll(`#fv-tels-${prefijo} .fila-telefono`).length) agregarFilaTelefono(prefijo, '');
     if (!contenido.querySelectorAll(`#fv-correos-${prefijo} .fila-correo`).length) agregarFilaCorreo(prefijo, '');
     refrescarMas(prefijo);
   }
-  cargarContacto('p', datos.propietario);
-  cargarContacto('i', datos.inquilino);
-  contenido.querySelector('#fv-tel-mas-p').addEventListener('click', () => { agregarFilaTelefono('p', ''); refrescarMas('p'); });
-  contenido.querySelector('#fv-tel-mas-i').addEventListener('click', () => { agregarFilaTelefono('i', ''); refrescarMas('i'); });
+  cargarCorreos('p', datos.propietario);
+  cargarCorreos('i', datos.inquilino);
   contenido.querySelector('#fv-correo-mas-p').addEventListener('click', () => { agregarFilaCorreo('p', ''); refrescarMas('p'); });
   contenido.querySelector('#fv-correo-mas-i').addEventListener('click', () => { agregarFilaCorreo('i', ''); refrescarMas('i'); });
 
@@ -573,7 +563,8 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
     const integrantes = leerIntegrantes(contenedorIntegrantesP);
     const integrantesInquilino = leerIntegrantes(contenedorIntegrantesI);
 
-    // Arma el bloque de teléfonos de emergencia (campos fijos).
+    // Arma el bloque de teléfonos (campos fijos Móvil/Casa/Trabajo):
+    // selector de país + número local.
     function telefonosDe(sufijo) {
       function armar(campo) {
         const input = contenido.querySelector(`#fv-${sufijo}-tel-${campo}`);
@@ -592,46 +583,29 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       return { telefonos, telefono };
     }
 
-    // Bloque de contacto (propietario o inquilino): lee las fichas de
-    // teléfonos y correos en orden y lo guarda en los mismos espacios
-    // de siempre (telefonos.movil/casa/trabajo y correo/correo2/correo3),
-    // así los registros antiguos y el directorio siguen funcionando.
-    function bloquesContacto(sufijo) {
-      const listaTel = [...contenido.querySelectorAll(`#fv-tels-${sufijo} .ft-numero`)].map((input) => {
-        const numero = input.value.trim();
-        if (!numero) return '';
-        const sel = input.closest('.campo-tel').querySelector('.tel-pais');
-        return sel.value ? `${sel.value} ${numero}` : numero;
-      }).filter(Boolean);
-      const telefonos = {
-        movil: listaTel[0] || '',
-        casa: listaTel[1] || '',
-        trabajo: listaTel[2] || '',
-      };
-      const telefono = telefonos.movil || telefonos.casa || telefonos.trabajo || '';
+    // Correos del propietario o del inquilino (fichas, hasta 3) guardados
+    // como correo / correo2 / correo3.
+    function correosDe(sufijo) {
       const correos = [...contenido.querySelectorAll(`#fv-correos-${sufijo} .fc-correo`)]
         .map((i) => i.value.trim()).filter(Boolean);
-      const correo = correos[0] || '';
-      return {
-        telefonos, telefono, correo,
-        correo2: correos[1] || '',
-        correo3: correos[2] || '',
-      };
+      return { correo: correos[0] || '', correo2: correos[1] || '', correo3: correos[2] || '' };
     }
 
+    const propTel = telefonosDe('p');
+    const inqTel = telefonosDe('i');
     const emeTel = telefonosDe('e');
-    const propC = bloquesContacto('p');
-    const inqC = bloquesContacto('i');
+    const propC = correosDe('p');
+    const inqC = correosDe('i');
 
     // Regla de guardado (Opción A): la persona principal — el inquilino si la
     // vivienda está en renta con inquilino nombrado; si no, el propietario —
     // necesita al menos un teléfono y al menos un correo.
     const sufijoPrincipal = (tipo === 'renta' && valor('#fv-i-nombre')) ? 'i' : 'p';
+    const telPrincipal = sufijoPrincipal === 'i' ? inqTel : propTel;
     const principal = sufijoPrincipal === 'i' ? inqC : propC;
-    if (!principal.telefono) {
-      toast('La persona principal necesita al menos un teléfono.', 'error');
-      const primerTel = contenido.querySelector(`#fv-tels-${sufijoPrincipal} .ft-numero`);
-      if (primerTel) primerTel.focus();
+    if (!telPrincipal.telefono) {
+      toast('La persona principal necesita al menos un teléfono (móvil, casa o trabajo).', 'error');
+      contenido.querySelector(`#fv-${sufijoPrincipal}-tel-movil`).focus();
       return;
     }
     if (!principal.correo) {
@@ -647,8 +621,8 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
           correo: inqC.correo,
           correo2: inqC.correo2,
           correo3: inqC.correo3,
-          telefonos: inqC.telefonos,
-          telefono: inqC.telefono,
+          telefonos: inqTel.telefonos,
+          telefono: inqTel.telefono,
         }
       : null;
 
@@ -661,8 +635,8 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
         correo: propC.correo,
         correo2: propC.correo2,
         correo3: propC.correo3,
-        telefonos: propC.telefonos,
-        telefono: propC.telefono,
+        telefonos: propTel.telefonos,
+        telefono: propTel.telefono,
       },
       inquilino: inquilino && (inquilino.nombre || inquilino.telefono || inquilino.correo) ? inquilino : null,
       integrantes,

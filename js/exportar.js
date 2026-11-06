@@ -128,7 +128,7 @@ const GUIA_FILAS = [
   ['Dirección', 'Número de casa o de apartamento. Junto con la Ubicación identifica la vivienda.'],
   ['Estado', 'Propia, En renta, Vacante o Inactiva. Si va vacío se toma como Propia.'],
   ['Propietario', 'Nombre del propietario.'],
-  ['Móvil / Casa / Trabajo', 'Los teléfonos de la persona, en orden: Móvil, Casa y Trabajo. Con código de país, ejemplo: +52 55 1234 5678. El primero es el que muestra WhatsApp.'],
+  ['Móvil / Casa / Trabajo', 'Teléfonos de la persona con código de país, ejemplo: +52 55 1234 5678. Sin código se asume +52 (México). El Móvil es el que muestra WhatsApp en el directorio.'],
   ['Correo 1, 2 y 3', 'La persona principal necesita al menos un correo para poder guardarse. Los tres correos se leen en orden.'],
   ['Inquilino', 'Solo llenar cuando el Estado es «En renta». Nombre y datos de contacto del inquilino.'],
   ['Emergencia', 'Contacto de emergencia opcional: nombre, teléfonos, tipo de sangre y relación.'],
