@@ -127,6 +127,25 @@
 }
 .abrir-correo:hover { opacity: 0.75; }
 
+/* Fichas de teléfonos adicionales: tarjeta con 📞 + selector de país. */
+.fila-telx {
+  grid-column: 1 / -1;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-mini);
+  background: var(--blanco);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fila-telx .campo-tel { flex: 1; }
+.fila-telx .aviso-tel { flex-shrink: 0; width: 160px; }
+.fila-telx button { flex-shrink: 0; }
+@media (max-width: 620px) {
+  .fila-telx { flex-wrap: wrap; }
+  .fila-telx .aviso-tel { width: 100%; order: 3; }
+}
+
 .fila-correo {
   grid-column: 1 / -1;
   border: 1px solid var(--borde);

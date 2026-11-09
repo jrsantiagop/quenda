@@ -20,8 +20,8 @@ y aislamiento de permisos (el residente no ve notas internas ni administración)
 - [x] Panel de comunidades (solo superadmin)
 - [x] Estructura configurable por comunidad (calles con casas o torres con apartamentos)
 - [x] Viviendas con propietario, inquilino (en renta), integrantes, emergencia, notas internas
-- [x] **Hasta 3 teléfonos por persona (casa, trabajo, móvil)** con **selector de código de país** (~180 países, +52 México predeterminado) y aviso suave de dígitos esperados
 - [x] **3 teléfonos fijos por persona (Móvil con WhatsApp, Casa, Trabajo)** con **selector de código de país** (~180 países, +52 México predeterminado) y aviso suave de dígitos esperados. El **icono de WhatsApp del formulario es un botón** que abre `wa.me` con el número escrito
+- [x] **Hasta 3 teléfonos adicionales** por propietario e inquilino (fichas «＋» con icono 📞 debajo de Móvil/Casa/Trabajo); salen en el directorio y en el Excel (38 columnas)
 - [x] **Hasta 3 correos por persona** (propietario e inquilino) con fichas agregables «＋» y botón ✉️ que abre la app de correo
 - [x] **Regla de guardado**: la persona principal (inquilino si hay renta con inquilino; si no, propietario) necesita **al menos un teléfono y un correo** para guardar
 - [x] **Directorio de solo lectura**: los números son texto fijo (sin enlaces ni botón "Llamar"); botón verde de **WhatsApp** (logo oficial) solo cuando hay móvil, y botón de Correo
@@ -45,7 +45,7 @@ En **Viviendas** (administración): botones **⬇️ Excel**, **📥 Importar**,
 **📝 Plantilla** y **🗄️ Respaldo**.
 
 - **⬇️ Excel** — el directorio completo como archivo **.xlsx real**: cada dato
-  en su columna y fila correspondientes (25 columnas: dirección, estado,
+  en su columna y fila correspondientes (38 columnas: dirección, estado,
   propietario con sus 3 teléfonos y su correo, inquilino, emergencia,
   integrantes, notas), con anchos de columna y filtro automático. Abre
   perfecto en cualquier Excel, sin importar la configuración regional del
@@ -221,11 +221,12 @@ quenda/
 
 ## 📇 Modelo de teléfonos y correos
 
-Cada persona (propietario, inquilino, contacto de emergencia) admite hasta 3
-números: `telefonos: { casa, trabajo, movil }` y un correo `correo`
-(el viejo `correo2` ya no se usa; si algún registro antiguo lo trae, se ignora
-en pantalla y se limpia al guardar). El campo antiguo `telefono` sigue
-aceptándose y se migra automáticamente a "móvil" al leerse.
+Cada persona (propietario, inquilino, contacto de emergencia) admite 3
+números fijos: `telefonos: { casa, trabajo, movil }` y hasta 3 correos
+(`correo`, `correo2`, `correo3`). El propietario y el inquilino también
+admiten hasta 3 **teléfonos adicionales** `telefonos: { extra1, extra2,
+extra3 }` (con Móvil/Casa/Trabajo intactos). El campo antiguo `telefono`
+sigue aceptándose y se migra automáticamente a "móvil" al leerse.
 
 **En el formulario** cada teléfono tiene un selector de código de país
 (`js/paises.js`, ~180 países, México +52 predeterminado y fijo arriba, con

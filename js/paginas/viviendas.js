@@ -370,6 +370,12 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       ${campoTelefono('p', 'trabajo', datos.propietario.telefonos.trabajo, 'Trabajo')}
 
       <div class="titulo-fila">
+        <h4 class="titulo-grupo">📞 Teléfonos adicionales (hasta 3)</h4>
+        <button type="button" class="boton boton-mini" id="fv-telx-mas-p" title="Agregar teléfono adicional">＋</button>
+      </div>
+      <div id="fv-tels-x-p" class="campo-ancho"></div>
+
+      <div class="titulo-fila">
         <h4 class="titulo-grupo">✉️ Correos (hasta 3)</h4>
         <button type="button" class="boton boton-mini" id="fv-correo-mas-p" title="Agregar correo">＋</button>
       </div>
@@ -388,6 +394,12 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
       ${campoTelefono('i', 'movil', datos.inquilino ? datos.inquilino.telefonos.movil : '', 'Móvil (WhatsApp)')}
       ${campoTelefono('i', 'casa', datos.inquilino ? datos.inquilino.telefonos.casa : '', 'Casa')}
       ${campoTelefono('i', 'trabajo', datos.inquilino ? datos.inquilino.telefonos.trabajo : '', 'Trabajo')}
+
+      <div class="titulo-fila">
+        <h4 class="titulo-grupo">📞 Teléfonos adicionales (hasta 3)</h4>
+        <button type="button" class="boton boton-mini" id="fv-telx-mas-i" title="Agregar teléfono adicional">＋</button>
+      </div>
+      <div id="fv-tels-x-i" class="campo-ancho"></div>
 
       <div class="titulo-fila">
         <h4 class="titulo-grupo">✉️ Correos (hasta 3)</h4>
@@ -539,6 +551,43 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
   contenido.querySelector('#fv-correo-mas-p').addEventListener('click', () => { agregarFilaCorreo('p', ''); refrescarMas('p'); });
   contenido.querySelector('#fv-correo-mas-i').addEventListener('click', () => { agregarFilaCorreo('i', ''); refrescarMas('i'); });
 
+  // --- Teléfonos adicionales del propietario y del inquilino (hasta 3) ---
+  // Fichas con icono 📞, selector de país, número local y aviso de dígitos;
+  // van debajo de los campos fijos Móvil/Casa/Trabajo, sin sustituirlos.
+  let nFichaTelX = 0;
+  function agregarFilaTelX(prefijo, valorCompleto) {
+    const contenedor = contenido.querySelector(`#fv-tels-x-${prefijo}`);
+    nFichaTelX += 1;
+    const idInput = `fv-${prefijo}-telx-${nFichaTelX}`;
+    const { codigo, numero } = partirTelefono(valorCompleto);
+    const fila = document.createElement('div');
+    fila.className = 'fila-telx';
+    fila.innerHTML = `
+      <span class="icono-telx" title="Teléfono adicional">📞</span>
+      <div class="campo-tel">
+        <select class="tel-pais">${htmlOpcionesPais(codigo)}</select>
+        <input class="fx-numero" id="${idInput}" value="${esc(numero)}" inputmode="tel" placeholder="Ej: 55 1234 5678">
+      </div>
+      <small class="aviso-tel" data-aviso-para="${idInput}" hidden></small>
+      <button type="button" class="boton boton-mini boton-peligro" title="Quitar teléfono adicional">✕</button>`;
+    fila.querySelector('button').addEventListener('click', () => { fila.remove(); refrescarTelX(prefijo); });
+    cablearAviso(fila.querySelector('.campo-tel'));
+    contenedor.appendChild(fila);
+  }
+  function refrescarTelX(prefijo) {
+    const btn = contenido.querySelector(`#fv-telx-mas-${prefijo}`);
+    if (btn) btn.hidden = contenido.querySelectorAll(`#fv-tels-x-${prefijo} .fila-telx`).length >= 3;
+  }
+  function cargarTelX(prefijo, telefonos) {
+    const t = telefonos || {};
+    [t.extra1, t.extra2, t.extra3].filter(Boolean).forEach((x) => agregarFilaTelX(prefijo, String(x).trim()));
+    refrescarTelX(prefijo);
+  }
+  cargarTelX('p', datos.propietario.telefonos);
+  cargarTelX('i', datos.inquilino ? datos.inquilino.telefonos : null);
+  contenido.querySelector('#fv-telx-mas-p').addEventListener('click', () => { agregarFilaTelX('p', ''); refrescarTelX('p'); });
+  contenido.querySelector('#fv-telx-mas-i').addEventListener('click', () => { agregarFilaTelX('i', ''); refrescarTelX('i'); });
+
   // --- Guardado ---
   const btnCancelar = document.createElement('button');
   btnCancelar.type = 'button';
@@ -574,10 +623,20 @@ function formulario(v, { estructura, esTorre, cont, ctx }) {
         const sel = input.closest('.campo-tel').querySelector('.tel-pais');
         return sel.value ? `${sel.value} ${numero}` : numero;
       }
+      const extras = [...contenido.querySelectorAll(`#fv-tels-x-${sufijo} .fx-numero`)]
+        .map((input) => {
+          const numero = input.value.trim();
+          if (!numero) return '';
+          const sel = input.closest('.campo-tel').querySelector('.tel-pais');
+          return sel.value ? `${sel.value} ${numero}` : numero;
+        });
       const telefonos = {
         casa: armar('casa'),
         trabajo: armar('trabajo'),
         movil: armar('movil'),
+        extra1: extras[0] || '',
+        extra2: extras[1] || '',
+        extra3: extras[2] || '',
       };
       const telefono = telefonos.movil || telefonos.casa || telefonos.trabajo || '';
       return { telefonos, telefono };

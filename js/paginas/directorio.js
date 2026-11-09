@@ -107,6 +107,9 @@ export async function render(cont, ctx) {
       t.movil ? `<span>${iconoWhatsapp('#25D366')} <span class="num-tel">${esc(t.movil)}</span></span>` : '',
       t.casa ? `<span>🏠 <span class="num-tel">${esc(t.casa)}</span></span>` : '',
       t.trabajo ? `<span>💼 <span class="num-tel">${esc(t.trabajo)}</span></span>` : '',
+      t.extra1 ? `<span>📞 <span class="num-tel">${esc(t.extra1)}</span></span>` : '',
+      t.extra2 ? `<span>📞 <span class="num-tel">${esc(t.extra2)}</span></span>` : '',
+      t.extra3 ? `<span>📞 <span class="num-tel">${esc(t.extra3)}</span></span>` : '',
     ].filter(Boolean).join('');
 
     const correo = p.correo || p.correo2 || p.correo3 || '';

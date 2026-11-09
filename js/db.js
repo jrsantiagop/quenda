@@ -388,7 +388,8 @@ export async function deleteVivienda(comunidadId, id) {
 
 /** Rellena campos faltantes de una vivienda para que la interfaz nunca se quede sin datos. */
 export function viviendaNormalizada(v) {
-  // Una persona admite hasta 3 teléfonos: casa, trabajo y móvil.
+  // Una persona admite 3 teléfonos fijos (móvil, casa, trabajo) y hasta
+  // 3 teléfonos adicionales (extra1/extra2/extra3).
   // Compatibilidad: si el registro antiguo trae solo "telefono", pasa a móvil.
   function persona(p) {
     const base = { nombre: '', correo: '', correo2: '', correo3: '', ...(p || {}) };
@@ -397,6 +398,9 @@ export function viviendaNormalizada(v) {
       casa: String(t.casa || '').trim(),
       trabajo: String(t.trabajo || '').trim(),
       movil: String(t.movil || '').trim(),
+      extra1: String(t.extra1 || '').trim(),
+      extra2: String(t.extra2 || '').trim(),
+      extra3: String(t.extra3 || '').trim(),
     };
     if (!telefonos.casa && !telefonos.trabajo && !telefonos.movil && base.telefono) {
       telefonos.movil = String(base.telefono).trim();
